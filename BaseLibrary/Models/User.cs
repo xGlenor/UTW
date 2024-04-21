@@ -1,9 +1,9 @@
 ﻿using BaseLibrary.enums;
-using Microsoft.AspNetCore.Identity;
+
 
 namespace BaseLibrary.Models;
 
-public class User : IdentityUser
+public class User
 {
     
     public string FirstName { get; set; }
