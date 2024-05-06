@@ -1,7 +1,6 @@
 using ServerLibrary.Data;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +11,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseMySql(
-        builder.Configuration.GetConnectionString("MariaDB"),
-        ServerVersion.Create(new Version("11.2.2"), ServerType.MariaDb)
-    ));
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlite("Data Source=utw.db");
+});
 
 builder.Services.AddHttpClient();
 

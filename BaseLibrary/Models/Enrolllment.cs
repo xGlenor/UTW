@@ -1,5 +1,6 @@
 ﻿namespace BaseLibrary.Models;
 
+
 public class Enrolllment : BaseEntity
 {
     public int UserId { get; set; }
