@@ -1,9 +1,7 @@
 ﻿namespace BaseLibrary.Models;
 
-public class Fee
+public class Fee : BaseEntity
 {
-    public int Id { get; set; }
-    
     public int UserId { get; set; }
     
     public DateTime IssueDate { get; set; }

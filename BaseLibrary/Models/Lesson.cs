@@ -1,9 +1,7 @@
 ﻿namespace BaseLibrary.Models;
 
-public class Lesson
+public class Lesson : BaseEntity
 {
-    public int Id { get; set; }
-    
     public string Name { get; set; }
     
     public string Description { get; set; }

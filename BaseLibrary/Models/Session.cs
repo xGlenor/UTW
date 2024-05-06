@@ -2,10 +2,8 @@
 
 namespace BaseLibrary.Models;
 
-public class Session
+public class Session : BaseEntity
 {
-    public int Id { get; set; }
-    
     public int SessionYear { get; set; }
     
     public SessionType SessionType { get; set; }

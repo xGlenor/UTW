@@ -1,11 +1,11 @@
 ﻿using BaseLibrary.enums;
 
 
+
 namespace BaseLibrary.Models;
 
-public class User
+public class User : BaseEntity
 {
-    
     public string FirstName { get; set; }
     
     public string LastName { get; set; }
@@ -16,5 +16,4 @@ public class User
     
     public string? Skills { get; set; }
     
-    public UserRole UserRole { get; set; }
 }
