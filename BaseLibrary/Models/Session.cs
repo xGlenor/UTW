@@ -8,7 +8,7 @@ public class Session : BaseEntity
     
     public SessionType SessionType { get; set; }
     
-    public ICollection<User>? Students { get; set; } = new List<User>();
+    public ICollection<Student>? Students { get; set; } = new List<Student>();
     
     public ICollection<Lesson>? Lessons { get; set; } = new List<Lesson>();
 }

@@ -1,10 +1,14 @@
 using System.Text;
+using BaseLibrary.Contracts;
+using BaseLibrary.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using ServerUTW.Data;
+using ServerUTW.Repositories;
 using Swashbuckle.AspNetCore.Filters;
 
 
@@ -17,6 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 */
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 
 /*
@@ -63,7 +68,6 @@ builder.Services.AddAuthentication(options =>
 | Swagger Settings
 |--------------------------------------------------------------------------
 */
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSwaggerGen(options =>
@@ -77,6 +81,12 @@ builder.Services.AddSwaggerGen(options =>
 
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
+/*
+|--------------------------------------------------------------------------
+| Swagger Settings
+|--------------------------------------------------------------------------
+*/
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
 
 /*
@@ -91,10 +101,18 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors(policy =>
+    {
+        policy.WithOrigins("http://localhost:7254", "https://localhost:7254")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithHeaders(HeaderNames.ContentType);
+    });
 }
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

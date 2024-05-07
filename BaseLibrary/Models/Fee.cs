@@ -2,7 +2,7 @@
 
 public class Fee : BaseEntity
 {
-    public int UserId { get; set; }
+    public int StudentId { get; set; }
     
     public DateTime IssueDate { get; set; }
     
@@ -12,6 +12,6 @@ public class Fee : BaseEntity
     
     public bool? isPaid { get; set; }
     
-    public User User { get; set; }
+    public Student Student { get; set; }
     
 }

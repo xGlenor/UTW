@@ -16,5 +16,5 @@ public class Lesson : BaseEntity
     
     public decimal? Price { get; set; }
     
-    public ICollection<User>? Teachers { get; set; } = new List<User>();
+    public ICollection<ApplicationUser>? Teachers { get; set; } = new List<ApplicationUser>();
 }

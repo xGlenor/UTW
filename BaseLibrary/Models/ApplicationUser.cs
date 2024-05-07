@@ -1,7 +1,7 @@
 ﻿using BaseLibrary.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace ServerUTW.Data;
+namespace BaseLibrary.Models;
 
 public class ApplicationUser : IdentityUser{
     
