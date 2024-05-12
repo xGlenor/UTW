@@ -34,7 +34,7 @@ public static ClaimsPrincipal SetClaimPrincipal(UserSession model)
             return new UserSession(Id, Name, Email, Role);
         }
 
-        public static JsonSerializerOptions JsonOptions()
+        private static JsonSerializerOptions JsonOptions()
         {
             return new JsonSerializerOptions
             {
