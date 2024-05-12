@@ -21,7 +21,7 @@ public class AppDbContext: IdentityDbContext<IdentityUser>
     
     public DbSet<Session> Sessions { get; set; }
     
-    public DbSet<Session> Students { get; set; }
+    public DbSet<Student> Students { get; set; }
     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
