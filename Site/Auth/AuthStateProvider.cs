@@ -3,7 +3,7 @@ using BaseLibrary.GenericModels;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace SiteUTW.Auth;
+namespace Site.Auth;
 
 public class AuthStateProvider(ILocalStorageService localStorageService) : AuthenticationStateProvider
 {

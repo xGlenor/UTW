@@ -1,10 +1,10 @@
-main {
+ï»¿main {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
     color: #333;
-    height: 2000px; /* Zmiana wysokoœci body na 2000px */
+    height: 2000px; /* Zmiana wysokoÅ“ci body na 2000px */
 }
 
 header {
@@ -17,7 +17,7 @@ header {
     position: fixed;
     width: 100%;
     z-index: 9999;
-    transition: top 0.3s; /* Dodaj p³ynne przejœcie dla nag³ówka */
+    transition: top 0.3s; /* Dodaj pÂ³ynne przejÅ“cie dla nagÂ³Ã³wka */
 }
 
 nav {
@@ -27,7 +27,7 @@ nav {
     text-align: center;
     position: fixed;
     width: 100%;
-    top: 5.5rem; /* Odleg³oœæ od góry równa wysokoœci nag³ówka */
+    top: 5.5rem; /* OdlegÂ³oÅ“Ã¦ od gÃ³ry rÃ³wna wysokoÅ“ci nagÂ³Ã³wka */
     z-index: 9999;
 }
 
@@ -42,7 +42,7 @@ nav ul {
 
 nav ul li {
     display: inline;
-    position: relative; /* Dodaj pozycjê wzglêdn¹ */
+    position: relative; /* Dodaj pozycjÃª wzglÃªdnÂ¹ */
 }
 
 nav ul li a {
@@ -56,15 +56,15 @@ nav ul li a {
 nav ul li ul {
     display: none; /* Ukryj rozwijane menu */
     position: absolute;
-    top: 100%; /* Ustaw po³o¿enie poni¿ej linku nadrzêdnego */
+    top: 100%; /* Ustaw poÂ³oÂ¿enie poniÂ¿ej linku nadrzÃªdnego */
     left: 0;
     background-color: #333;
-    min-width: 200px; /* Ustaw minimaln¹ szerokoœæ menu rozwijanego */
-    z-index: 999; /* Ustaw z-index, aby by³o widoczne nad innymi elementami */
+    min-width: 200px; /* Ustaw minimalnÂ¹ szerokoÅ“Ã¦ menu rozwijanego */
+    z-index: 999; /* Ustaw z-index, aby byÂ³o widoczne nad innymi elementami */
 }
 
 nav ul li:hover ul {
-    display: block; /* Poka¿ rozwijane menu po najechaniu */
+    display: block; /* PokaÂ¿ rozwijane menu po najechaniu */
 }
 
 nav ul li ul li {
@@ -72,7 +72,7 @@ nav ul li ul li {
 }
 
 nav ul li ul li a {
-    padding: 0.5rem 1rem; /* Dostosuj wciêcie i odstêp */
+    padding: 0.5rem 1rem; /* Dostosuj wciÃªcie i odstÃªp */
 }
 
 nav ul li a:hover,
@@ -84,7 +84,7 @@ nav ul li ul li a:hover {
     width: 80%;
     margin: auto;
     overflow: hidden;
-    padding-top: 17rem; /* Dodaj dodatkowy margines dla treœci, aby unikn¹æ zakrycia przez navbar */
+    padding-top: 17rem; /* Dodaj dodatkowy margines dla treÅ“ci, aby uniknÂ¹Ã¦ zakrycia przez navbar */
 }
 
 footer {

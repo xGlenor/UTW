@@ -6,7 +6,7 @@ namespace ServerUTW.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccoutController(IAccountRepository accountRepository) : ControllerBase
+public class AccountController(IAccountRepository accountRepository) : ControllerBase
 {
     [HttpPost("registerUser")]
     public async Task<IActionResult> Register(UserDTO userDto)
