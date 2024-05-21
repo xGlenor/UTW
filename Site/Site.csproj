@@ -18,12 +18,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Pages\DashBoard\" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Layout\AdminLayout.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Admin\Layout\NavMenu.razor" />
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Pages\Admin\Layout\AdminLayout.razor" />
-      <AdditionalFiles Include="Pages\Admin\Layout\NavMenu.razor" />
+      <AdditionalFiles Include="Pages\DashBoard\Layout\AdminLayout.razor" />
+      <AdditionalFiles Include="Pages\DashBoard\Layout\NavMenu.razor" />
     </ItemGroup>
     
 </Project>

@@ -1,5 +1,4 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Site.Pages.Admin.Layout
 @using Site.Pages.Site.Layout
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
@@ -11,7 +10,7 @@
         </Found>
         <NotFound>
             <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="@typeof(AdminLayout)">
+            <LayoutView Layout="@typeof(SiteLayout)">
                 <p role="alert">Sorry, there's nothing at this address.</p>
             </LayoutView>
         </NotFound>
