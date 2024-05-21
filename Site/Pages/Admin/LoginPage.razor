@@ -1,12 +1,12 @@
 ﻿@layout AdminLayout
-@page "/login"
+@page "/admin/login"
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavManager
 @using BaseLibrary.Contracts
 @using Microsoft.AspNetCore.Components.Authorization
 @using BaseLibrary.DTOs
 @using global::Site.Auth
-@using global::Site.Pages.Admin.Layout
+@using global::Site.Pages.DashBoard.Layout
 
 
 @inject IAccountRepository AccountService
@@ -66,7 +66,7 @@
 
             var customAuthStateProvider = (AuthStateProvider)AuthStateProvider;
             await customAuthStateProvider.UpdateAuthenticationState(token);
-            NavManager.NavigateTo("/", forceLoad: true);
+            NavManager.NavigateTo("/admin", forceLoad: true);
         }
 
         await js.InvokeVoidAsync("alert", message);
