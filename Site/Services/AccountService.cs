@@ -2,6 +2,7 @@
 using BaseLibrary.DTOs;
 using BaseLibrary.GenericModels;
 using BaseLibrary.Models;
+using BaseLibrary.Responses;
 using Blazored.LocalStorage;
 using Site.Pages;
 
@@ -18,7 +19,7 @@ namespace Site.Services
         private readonly HttpClient httpClient;
         private readonly ILocalStorageService localStorageService;
 
-        public async Task<ServiceResponses.GeneralResponse> CreateAccount(UserDTO userDTO)
+        public async Task<GeneralResponse> CreateAccount(UserDTO userDTO)
         {
             var response = await httpClient
                  .PostAsync($"{BaseUrl}/registerUser",
@@ -27,15 +28,15 @@ namespace Site.Services
 
             //Read Response
             if (!response.IsSuccessStatusCode)
-                return new ServiceResponses.GeneralResponse(false, "Error occured. Try again later...");
+                return new GeneralResponse(false, "Error occured. Try again later...");
 
             var apiResponse = await response.Content.ReadAsStringAsync();
-            return Generics.DeserializeJsonString<ServiceResponses.GeneralResponse>(apiResponse);
+            return Generics.DeserializeJsonString<GeneralResponse>(apiResponse);
         }
 
         
 
-        public async Task<ServiceResponses.LoginResponse> LoginAccount(LoginDTO loginDTO)
+        public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)
         {
             var response = await httpClient
                .PostAsync($"{BaseUrl}/loginUser",
@@ -44,10 +45,10 @@ namespace Site.Services
 
             //Read Response
             if (!response.IsSuccessStatusCode)
-                return new ServiceResponses.LoginResponse(false, null!, "Error occured. Try again later...");
+                return new LoginResponse(false, null!, "Error occured. Try again later...");
 
             var apiResponse = await response.Content.ReadAsStringAsync();
-            return Generics.DeserializeJsonString<ServiceResponses.LoginResponse>(apiResponse); 
+            return Generics.DeserializeJsonString<LoginResponse>(apiResponse); 
 
         }
         

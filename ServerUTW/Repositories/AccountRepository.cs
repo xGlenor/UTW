@@ -4,9 +4,9 @@ using System.Text;
 using BaseLibrary.Contracts;
 using BaseLibrary.DTOs;
 using BaseLibrary.Models;
+using BaseLibrary.Responses;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using static BaseLibrary.DTOs.ServiceResponses;
 namespace ServerUTW.Repositories;
 
 public class AccountRepository(
@@ -28,7 +28,7 @@ public class AccountRepository(
             Email = userDto.Email,
             UserName = userDto.Email
         };
-
+        
         var user = await userManager.FindByEmailAsync(newUser.Email);
 
         if (user != null)

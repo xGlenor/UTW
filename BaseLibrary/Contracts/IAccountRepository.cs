@@ -1,6 +1,5 @@
 ﻿using BaseLibrary.DTOs;
-
-using static BaseLibrary.DTOs.ServiceResponses;
+using BaseLibrary.Responses;
 namespace BaseLibrary.Contracts;
 
 public interface IAccountRepository
