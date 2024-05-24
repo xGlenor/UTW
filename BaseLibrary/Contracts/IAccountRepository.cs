@@ -7,4 +7,5 @@ public interface IAccountRepository
     Task<GeneralResponse> CreateAccount(UserDTO? userDto);
 
     Task<LoginResponse> LoginAccount(LoginDTO? loginDto);
+
 }
