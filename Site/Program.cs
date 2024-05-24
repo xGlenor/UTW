@@ -16,6 +16,5 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddScoped<IAccountRepository, AccountService>();
-builder.Services.AddScoped<IStudentRepository, AccountService>();
 
 await builder.Build().RunAsync();

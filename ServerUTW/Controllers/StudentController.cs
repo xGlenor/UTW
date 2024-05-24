@@ -1,4 +1,6 @@
-﻿using BaseLibrary.Models;
+﻿using BaseLibrary.Contracts;
+using BaseLibrary.Models;
+using BaseLibrary.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,10 +19,18 @@ public class StudentController : ControllerBase
     };
 
     private readonly ILogger<StudentController> _logger;
+    private readonly IStudentRepository _studentRepository;
 
-    public StudentController(ILogger<StudentController> logger)
+    public StudentController(ILogger<StudentController> logger, IStudentRepository studentRepository)
     {
         _logger = logger;
+        _studentRepository = studentRepository;
+    }
+    
+    [HttpPost]
+    public async Task<ActionResult<Student>> PostStudent(Student student)
+    {
+        return NotFound();
     }
 
     [HttpGet("admin")]

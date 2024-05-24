@@ -86,8 +86,9 @@ builder.Services.AddSwaggerGen(options =>
 | Swagger Settings
 |--------------------------------------------------------------------------
 */
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 /*
 |--------------------------------------------------------------------------

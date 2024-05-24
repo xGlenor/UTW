@@ -15,7 +15,7 @@ namespace ServerUTW.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
 
             modelBuilder.Entity("BaseLibrary.Models.Enrolllment", b =>
                 {
@@ -44,7 +44,7 @@ namespace ServerUTW.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Enrolllments");
+                    b.ToTable("Enrolllments", (string)null);
                 });
 
             modelBuilder.Entity("BaseLibrary.Models.Fee", b =>
@@ -79,7 +79,7 @@ namespace ServerUTW.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Fees");
+                    b.ToTable("Fees", (string)null);
                 });
 
             modelBuilder.Entity("BaseLibrary.Models.Lesson", b =>
@@ -124,7 +124,7 @@ namespace ServerUTW.Migrations
 
                     b.HasIndex("SessionId");
 
-                    b.ToTable("Lessons");
+                    b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("BaseLibrary.Models.Session", b =>
@@ -147,7 +147,7 @@ namespace ServerUTW.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Session");
+                    b.ToTable("Sessions", (string)null);
                 });
 
             modelBuilder.Entity("BaseLibrary.Models.Student", b =>
@@ -184,7 +184,7 @@ namespace ServerUTW.Migrations
 
                     b.HasIndex("SessionId");
 
-                    b.ToTable("Student");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

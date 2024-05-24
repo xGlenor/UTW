@@ -8,7 +8,7 @@ using Site.Pages;
 
 namespace Site.Services
 {
-    public class AccountService : IAccountRepository, IStudentRepository
+    public class AccountService : IAccountRepository
     {
         public AccountService(HttpClient httpClient, ILocalStorageService localStorageService)
         {

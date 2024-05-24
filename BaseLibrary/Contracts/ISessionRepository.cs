@@ -14,6 +14,5 @@ namespace BaseLibrary.Contracts
         void Insert(Session session);
         void Update(Session session);
         void Delete(int SessionID);
-        void Save();
     }
 }

@@ -26,6 +26,12 @@ public class AppDbContext: IdentityDbContext<IdentityUser>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        
+        modelBuilder.Entity<Enrolllment>().ToTable("Enrolllments");
+        modelBuilder.Entity<Fee>().ToTable("Fees");
+        modelBuilder.Entity<Lesson>().ToTable("Lessons");
+        modelBuilder.Entity<Session>().ToTable("Sessions");
+        modelBuilder.Entity<Student>().ToTable("Students");
         base.OnModelCreating(modelBuilder);
     }
     
