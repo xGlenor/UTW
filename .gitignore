@@ -3,3 +3,10 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+/ServerUTW/utw.db
+/.vs
+/.idea/.idea.UTW/.idea
+/ServerUTW/ServerUTW.csproj.user
+/UTW.sln.DotSettings.user
+/Site/Site.csproj.user
+/ServerUTW/utw.db
