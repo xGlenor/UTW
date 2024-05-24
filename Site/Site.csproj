@@ -24,10 +24,7 @@
 
     <ItemGroup>
       <AdditionalFiles Include="Pages\DashBoard\Layout\AdminLayout.razor" />
-<<<<<<< HEAD
-=======
       <AdditionalFiles Include="Pages\DashBoard\Layout\NavMenu.razor" />
->>>>>>> master/master
     </ItemGroup>
     
 </Project>
