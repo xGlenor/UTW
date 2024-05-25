@@ -21,14 +21,14 @@ namespace ServerUTW.Controllers
             _context = context;
         }
 
-        // GET: api/Fees
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Fee>>> GetFees()
         {
             return await _context.Fees.ToListAsync();
         }
 
-        // GET: api/Fees/5
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<Fee>> GetFee(int id)
         {
@@ -42,8 +42,7 @@ namespace ServerUTW.Controllers
             return fee;
         }
 
-        // PUT: api/Fees/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutFee(int id, Fee fee)
         {
@@ -73,8 +72,6 @@ namespace ServerUTW.Controllers
             return NoContent();
         }
 
-        // POST: api/Fees
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Fee>> PostFee(Fee fee)
         {
@@ -84,7 +81,7 @@ namespace ServerUTW.Controllers
             return CreatedAtAction("GetFee", new { id = fee.Id }, fee);
         }
 
-        // DELETE: api/Fees/5
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFee(int id)
         {

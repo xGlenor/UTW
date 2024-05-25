@@ -21,14 +21,14 @@ namespace ServerUTW.Controllers
             _context = context;
         }
 
-        // GET: api/Sessions
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Session>>> GetSessions()
         {
             return await _context.Sessions.ToListAsync();
         }
 
-        // GET: api/Sessions/5
+   
         [HttpGet("{id}")]
         public async Task<ActionResult<Session>> GetSession(int id)
         {
@@ -42,8 +42,7 @@ namespace ServerUTW.Controllers
             return session;
         }
 
-        // PUT: api/Sessions/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSession(int id, Session session)
         {
@@ -73,8 +72,7 @@ namespace ServerUTW.Controllers
             return NoContent();
         }
 
-        // POST: api/Sessions
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+       
         [HttpPost]
         public async Task<ActionResult<Session>> PostSession(Session session)
         {
@@ -84,7 +82,7 @@ namespace ServerUTW.Controllers
             return CreatedAtAction("GetSession", new { id = session.Id }, session);
         }
 
-        // DELETE: api/Sessions/5
+ 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSession(int id)
         {
