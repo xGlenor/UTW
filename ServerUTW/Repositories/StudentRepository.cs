@@ -20,28 +20,48 @@ public class StudentRepository : IStudentRepository
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Student>> GetAll()
+    public async Task<List<Student>> GetAll()
     {
-        throw new NotImplementedException();
+        return await _dbContext.Students.ToListAsync();
     }
 
-    public Task<Student> GetById(int studentID)
+    public async Task<Student?> GetById(int studentID)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Students.FindAsync(studentID);
     }
 
-    public Task<Student> Insert(Student student)
+    public async Task<Student> Insert(Student student)
     {
-        throw new NotImplementedException();
+        await _dbContext.Students.AddAsync(student);
+        await _dbContext.SaveChangesAsync();
+        return student;
     }
 
-    public Task<Student> Update(Student student)
+    public async Task<Student> Update(int id, Student student)
     {
-        throw new NotImplementedException();
+        var existingStudent = await _dbContext.Students.FirstOrDefaultAsync(student => student.Id.Equals(id));
+
+        if (existingStudent == null)
+            return null;
+
+        existingStudent.FirstName = student.FirstName;
+        existingStudent.LastName = student.LastName;
+        existingStudent.Address = student.Address;
+        existingStudent.Birthdate = student.Birthdate;
+
+        await _dbContext.SaveChangesAsync();
+        return existingStudent;
     }
 
-    public Task<Student> Delete(int studentID)
+    public async Task<Student> Delete(int studentID)
     {
-        throw new NotImplementedException();
+        var student = await _dbContext.Students.FirstOrDefaultAsync(student => student.Id.Equals(studentID));
+
+        if (student == null)
+            return null;
+
+        _dbContext.Students.Remove(student);
+        await _dbContext.SaveChangesAsync();
+        return student;
     }
 }

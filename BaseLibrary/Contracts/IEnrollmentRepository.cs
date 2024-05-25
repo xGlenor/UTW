@@ -5,11 +5,10 @@ namespace BaseLibrary.Contracts;
 
 public interface IEnrollmentRepository
 {
-        IEnumerable<Enrolllment> GetAll();
-        Enrolllment GetById(int EnrollmentID);
-        void Insert(Enrolllment enrolllment);
-        void Update(Enrolllment enrolllment);
-        void Delete(int EnrollmentID);
-        void Save();
-    
+        Task<List<Enrolllment>> GetAll();
+        Task<Enrolllment?> GetById(int enrollmentID);
+        Task<Enrolllment> Insert(Enrolllment enrollment);
+        Task<Enrolllment> Update(int id, Enrolllment enrollment);
+        Task<Enrolllment> Delete(int enrollmentID);
+
 }

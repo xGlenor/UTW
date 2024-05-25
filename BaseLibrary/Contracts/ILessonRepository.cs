@@ -9,11 +9,11 @@ namespace BaseLibrary.Contracts
 {
     public interface ILessonRepository
     {
-        IEnumerable<Lesson> GetAll();
-        Lesson GetById(int LessonID);
-        void Insert(Lesson lesson);
-        void Update(Lesson lesson);
-        void Delete(int LessonID);
-        void Save();
+        Task<List<Lesson>> GetAll();
+        Task<Lesson?> GetById(int lessonID);
+        Task<Lesson> Insert(Lesson lesson);
+        Task<Lesson> Update(int id, Lesson lesson);
+        Task<Lesson> Delete(int lessonID);
     }
+}
 }

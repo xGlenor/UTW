@@ -9,11 +9,10 @@ namespace BaseLibrary.Contracts
 {
     public interface IFeeRepository
     {
-        IEnumerable<Fee> GetAll();
-        Fee GetById(int FeeID);
-        void Insert(Fee fee);
-        void Update(Fee fee);
-        void Delete(int FeeID);
-        void Save();
+        Task<List<Fee>> GetAll();
+        Task<Fee?> GetById(int feeID);
+        Task<Fee> Insert(Fee fee);
+        Task<Fee> Update(int id, Fee fee);
+        Task<Fee> Delete(int feeID);
     }
 }

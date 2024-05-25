@@ -9,10 +9,10 @@ namespace BaseLibrary.Contracts
 {
     public interface ISessionRepository
     {
-        IEnumerable<Session> GetAll();
-        Session GetById(int SessionID);
-        void Insert(Session session);
-        void Update(Session session);
-        void Delete(int SessionID);
+        Task<List<Session>> GetAll();
+        Task<Session?> GetById(int sessionID);
+        Task<Session> Insert(Session session);
+        Task<Session> Update(int id, Session session);
+        Task<Session> Delete(int sessionID);
     }
 }

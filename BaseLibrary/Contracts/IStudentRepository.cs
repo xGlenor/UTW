@@ -1,14 +1,20 @@
 ﻿using BaseLibrary.Models;
-using BaseLibrary.Responses;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace BaseLibrary.Contracts;
-
+namespace BaseLibrary.Contracts
+{
 public interface IStudentRepository
 {
     Task<Student[]> GetStudents();
-    Task<IEnumerable<Student>> GetAll();
-    Task<Student> GetById(int studentID);
+    Task<List<Student>> GetAll();
+    Task<Student?> GetById(int studentID);
     Task<Student> Insert(Student student);
-    Task<Student> Update(Student student);
+    Task<Student> Update(int id, Student student);
     Task<Student> Delete(int studentID);
+}
+
 }
