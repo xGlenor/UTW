@@ -19,7 +19,10 @@ builder.Services.AddRadzenComponents();
 builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 builder.Services.AddScoped<IAccountRepository, AccountService>();
 builder.Services.AddScoped<IStudentRepository, StudentService>();
-builder.Services.AddSingleton(typeof(NotificationService));
+builder.Services.AddScoped<IEnrollmentRepository, EnrollmentService>();
+builder.Services.AddScoped<IFeeRepository, FeeService>();
+builder.Services.AddScoped<ILessonRepository, LessonService>();
+builder.Services.AddScoped<ISessionRepository, SessionService>();
 
 
 await builder.Build().RunAsync();
