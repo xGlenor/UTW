@@ -8,17 +8,17 @@
 <h3>Lista Studentów</h3>
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" Click="@InsertRow" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" />
 </RadzenStack>
 
-<RadzenDataGrid Data="@students" AllowPaging="true" AllowSorting="true" PageSize="10" RowCreate="@OnCreateRow">
+<RadzenDataGrid @ref="grid" Data="@students" AllowPaging="true" AllowSorting="true" PageSize="10">
     <Columns>
         <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn Property="FirstName" Title="First Name" Width="200px" />
-        <RadzenDataGridColumn Property="LastName" Title="Last Name" Width="200px"/>
-        <RadzenDataGridColumn Property="Address" Title="Address" Width="200px" />
-        <RadzenDataGridColumn Property="Birthdate" Title="Birth Date" FormatString="{0:d}" Width="150px" />
-        <RadzenDataGridColumn Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+        <RadzenDataGridColumn Property="FirstName" Title="First Name" />
+        <RadzenDataGridColumn Property="LastName" Title="Last Name" />
+        <RadzenDataGridColumn Property="Address" Title="Address"  />
+        <RadzenDataGridColumn Property="Birthdate" Title="Birth Date" FormatString="{0:d}" />
+        <RadzenDataGridColumn Title="Akcja" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
             <Template Context="student">
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(student))" @onclick:stopPropagation="true">
                 </RadzenButton>
@@ -38,19 +38,6 @@
         
     }
     
-    private Task CancelEdit(Student student)
-    {
-        throw new NotImplementedException();
-    }
-
-    private async Task InsertRow()
-    {
-
-
-        var student = new Student();
-        await StudentService.Insert(student);
-        await grid.InsertRow(student);
-    }
     
     private async void DeleteRow(Student student)
     {
