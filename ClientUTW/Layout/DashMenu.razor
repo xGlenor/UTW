@@ -1,104 +1,78 @@
 ﻿<nav id="sidebar" class="sidebar js-sidebar">
     <div class="sidebar-content js-simplebar">
-        <a class="sidebar-brand" href="DaneStudentow.html">
+        <a class="sidebar-brand" href="index.html">
             <span class="align-middle">AdminKit</span>
         </a>
 
         <ul class="sidebar-nav">
 
-            <li class="sidebar-item active">
-                <NavLink class="sidebar-link" href="DaneStudentow.html">
-                    <i class="align-middle" data-feather="user"></i>
-                    <span class="align-middle">
-                        Rejestracja i aktualizacja danych osobowych studentów
-                    </span>
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="/"><i class="fa-solid fa-chalkboard"></i> <span class="align-middle">Dashboard</span></NavLink>
+            </li>
+
+            <li class="sidebar-header">
+                Studenci
+            </li>
+
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="admin/Studenci/Lista">
+                    <i class="align-middle" data-feather="list"></i> <span class="align-middle">Lista</span>
                 </NavLink>
-                
-                <a class="sidebar-link" href="DaneStudentow.html">
-                    <i class="align-middle" data-feather="user"></i>
-                    <span class="align-middle">
-                        Rejestracja i aktualizacja danych osobowych studentów
-                    </span>
-                </a>
-            </li>
-
-
-            <li class="sidebar-header">Zarządzanie studentami</li>
-
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="DaneStudentow.html">
-                    <i class="align-middle" data-feather="user"></i>
-                    <span class="align-middle">
-                        Rejestracja i aktualizacja danych osobowych studentów
-                    </span>
-                </a>
             </li>
 
             <li class="sidebar-item">
-                <a class="sidebar-link" href="Oplaty.html">
-                    <i class="align-middle" data-feather="list"></i>
-                    <span class="align-middle">Prowadzenie ewidencji opłat </span>
-                </a>
+                <NavLink class="sidebar-link" href="Oplaty.html">
+                    <i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Opłaty</span>
+                </NavLink>
             </li>
 
-            <li class="sidebar-header">Zarządzanie zajęciami</li>
 
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="ui-buttons.html">
-                    <i class="align-middle" data-feather="square"></i>
-                    <span class="align-middle">Tworzenie i edycja planu zajęć</span>
-                </a>
+            <li class="sidebar-header">
+                Zajęcia & Semestry
             </li>
 
             <li class="sidebar-item">
-                <a class="sidebar-link" href="ui-forms.html">
-                    <i class="align-middle" data-feather="check-square"></i>
-                    <span class="align-middle">
-                        Przypisywanie wykładowców i prowadzących do zajęć
-                    </span
-                    >
-                </a>
+                <NavLink class="sidebar-link" href="ui-buttons.html">
+                    <i class="align-middle" data-feather="square"></i> <span class="align-middle">Semestry</span>
+                </NavLink>
             </li>
 
             <li class="sidebar-item">
-                <a class="sidebar-link" href="ui-cards.html">
-                    <i class="align-middle" data-feather="grid"></i>
-                    <span class="align-middle">Prowadzenie rejestru obecności</span>
-                </a>
+                <NavLink class="sidebar-link" href="ui-forms.html">
+                    <i class="align-middle" data-feather="check-square"></i> <span class="align-middle">Przypisywanie wykładowców i prowadzących do zajęć</span>
+                </NavLink>
             </li>
 
             <li class="sidebar-item">
-                <a class="sidebar-link" href="ui-typography.html">
-                    <i class="align-middle" data-feather="align-left"></i>
-                    <span class="align-middle">
-                        Dostęp do statystyk i raportów dotyczących zajęć
-                    </span
-                    >
-                </a>
-            </li>
-
-            <li class="sidebar-header">Zarządzanie kadrą</li>
-
-            <li class="sidebar-item">
-                <a class="sidebar-link" href="charts-chartjs.html">
-                    <i class="align-middle" data-feather="bar-chart-2"></i>
-                    <span class="align-middle">
-                        Prowadzenie ewidencji danych osobowych wykładowców i
-                        prowadzących, studentów
-                    </span
-                    >
-                </a>
+                <NavLink class="sidebar-link" href="ui-cards.html">
+                    <i class="align-middle" data-feather="grid"></i> <span class="align-middle">Prowadzenie rejestru obecności</span>
+                </NavLink>
             </li>
 
             <li class="sidebar-item">
-                <a class="sidebar-link" href="maps-google.html">
-                    <i class="align-middle" data-feather="map"></i>
-                    <span class="align-middle">
-                        Możliwość tworzenia i edytowania harmonogramów pracy
-                    </span
-                    >
-                </a>
+                <NavLink class="sidebar-link" href="ui-typography.html">
+                    <i class="align-middle" data-feather="align-left"></i> <span class="align-middle">Dostęp do statystyk i raportów dotyczących zajęć</span>
+                </NavLink>
+            </li>
+
+
+            <li class="sidebar-header">
+                Zarządzanie kadrą
+            </li>
+
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="charts-chartjs.html">
+                    <i class="align-middle" data-feather="bar-chart-2"></i> <span class="align-middle">Prowadzenie ewidencji danych osobowych wykładowców i prowadzących, studentów</span>
+                </NavLink>
+            </li>
+
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="maps-google.html">
+                    <i class="align-middle" data-feather="map"></i> <span class="align-middle">Możliwość tworzenia i edytowania harmonogramów pracy</span>
+                </NavLink>
             </li>
         </ul>
+
+
     </div>
 </nav>

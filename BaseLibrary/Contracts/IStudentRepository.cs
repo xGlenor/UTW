@@ -9,7 +9,6 @@ namespace BaseLibrary.Contracts
 {
 public interface IStudentRepository
 {
-    Task<Student[]> GetStudents();
     Task<List<Student>> GetAll();
     Task<Student?> GetById(int studentID);
     Task<Student> Insert(Student student);

@@ -14,12 +14,7 @@ public class StudentRepository : IStudentRepository
     {
         _dbContext = dbContext;
     }
-
-    public Task<Student[]> GetStudents()
-    {
-        throw new NotImplementedException();
-    }
-
+    
     public async Task<List<Student>> GetAll()
     {
         return await _dbContext.Students.ToListAsync();
