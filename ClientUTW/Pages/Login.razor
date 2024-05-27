@@ -1,0 +1,75 @@
+﻿@page "/Login"
+@using BaseLibrary.Contracts
+@using BaseLibrary.DTOs
+@using ClientUTW.Auth
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+
+
+@inject IAccountRepository AccountService
+@inject IJSRuntime js
+
+@layout AuthLayout
+
+
+<main class="d-flex w-100 ">
+    <div class="container d-flex flex-column">
+        <div class="row vh-100">
+            <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 mx-auto d-table h-100">
+                <div class="d-table-cell align-middle">
+
+                    <div class="text-center mt-4">
+                        <h1 class="h2">UTW</h1>
+                        <p class="lead">
+                            Zaloguj się do panelu UTW.
+                        </p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="m-sm-3">
+                                <EditForm Enhance Model="User" OnValidSubmit="HandleLogin">
+                                    <DataAnnotationsValidator />
+                                    <ValidationSummary />
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input  @bind="User.Email" class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Password</label>
+                                        <input @bind="User.Password" class="form-control form-control-lg" type="password" name="password" placeholder="Enter password" />
+                                    </div>
+                                    <div class="d-grid gap-2 mt-3">
+                                        <button class="btn btn-lg btn-primary" type="submit">Zaloguj się</button>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@code {
+    public LoginDTO User { get; set; } = new();
+
+    async Task HandleLogin()
+    {
+        var (flag, token, message) = await AccountService.LoginAccount(User);
+        if (flag)
+        {
+            string customMessage = $"{message}{Environment.NewLine}{token}";
+            await js.InvokeVoidAsync("alert", customMessage);
+            User = new();
+
+            var customAuthStateProvider = (AuthStateProvider)AuthStateProvider;
+            await customAuthStateProvider.UpdateAuthenticationState(token);
+            NavManager.NavigateTo("/admin", forceLoad: true);
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+    }
+}

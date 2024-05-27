@@ -74,6 +74,11 @@ public class AccountRepository(
         return new LoginResponse(true, token!, "Logowanie pomyślne");
     }
 
+    public Task<Student[]> GetStudents()
+    {
+        throw new NotImplementedException();
+    }
+
     private string GenerateToken(UserSession? user)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));

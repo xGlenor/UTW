@@ -1,0 +1,112 @@
+﻿@page "/Register"
+@using BaseLibrary.Contracts
+@using BaseLibrary.DTOs
+@using ClientUTW.Auth
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+
+
+@inject IAccountRepository AccountService
+@inject IJSRuntime js
+
+@layout AuthLayout
+
+
+<main class="d-flex w-100 ">
+    <div class="container d-flex flex-column">
+        <div class="row vh-100">
+            <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 mx-auto d-table h-100">
+                <div class="d-table-cell align-middle">
+
+                    <div class="text-center mt-4">
+                        <h1 class="h2">UTW</h1>
+                        <p class="lead">
+                            Zaloguj się do panelu UTW.
+                        </p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="m-sm-3">
+                                <EditForm Model="User" OnValidSubmit="HandleRegistration" Enhance>
+                                    <DataAnnotationsValidator />
+                                    <ValidationSummary />
+                                    <div class="mb-3">
+                                        <label class="form-label">FirstName</label>
+                                        <input  @bind="User.FirstName" class="form-control form-control-lg" type="text" name="firstname" placeholder="Enter your FirstName" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">LastName</label>
+                                        <input  @bind="User.LastName" class="form-control form-control-lg" type="text" name="lastname" placeholder="Enter your LastName" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input  @bind="User.Email" class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Password</label>
+                                        <div class="input-group mb-3">
+                                            <input type="@(ShowPassword is true ? "text" : "password")"
+                                                   class="form-control"
+                                                   @bind="User.Password"
+                                                   placeholder="Password"
+                                                   aria-label="Password"
+                                                   aria-describedby="Password">
+
+                                            <span class="input-group-text cursorStyle"
+                                                  id="Password"
+                                                  @onclick="ShowPasswordEvent"> @(ShowPassword is true ? "Hide" : "Show") </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Confirm Password</label>
+                                        <div class="input-group mb-3">
+                                            <input type="@(ShowConfirmPassword is true ? "text" : "password")"
+                                                   class="form-control"
+                                                   @bind="User.ConfirmPassword"
+                                                   placeholder="Confirm Password"
+                                                   aria-label="ConfirmPassword"
+                                                   aria-describedby="Confirm-Password">
+
+                                            <span class="input-group-text cursorStyle"
+                                                  id="ConfirmPassword"
+                                                  @onclick="ShowConfirmPasswordEvent"> @(ShowConfirmPassword is true ? "Hide" : "Show") </span>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid gap-2 mt-3">
+                                        <button class="btn btn-lg btn-primary" type="submit">Zaloguj się</button>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@code {
+    public bool ShowPassword { get; set; }
+    public bool ShowConfirmPassword { get; set; }
+
+    public UserDTO User { get; set; } = new();
+    private async Task HandleRegistration()
+    {
+        var (flag, message) = await AccountService.CreateAccount(User);
+        if (flag)
+        {
+            await js.InvokeVoidAsync("alert", message);
+            User = new();
+            NavManager.NavigateTo("/Login", forceLoad: true);
+            return;
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+
+    }
+
+    void ShowPasswordEvent() => ShowPassword = !ShowPassword;
+    void ShowConfirmPasswordEvent() => ShowConfirmPassword = !ShowConfirmPassword;
+}

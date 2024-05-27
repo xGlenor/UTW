@@ -104,7 +104,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors(policy =>
     {
-        policy.WithOrigins("http://localhost:7223", "https://localhost:7223")
+        policy.WithOrigins("http://localhost:7132", "https://localhost:7132")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .WithHeaders(HeaderNames.ContentType);
