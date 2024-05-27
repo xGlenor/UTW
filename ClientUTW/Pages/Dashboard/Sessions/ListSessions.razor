@@ -1,0 +1,47 @@
+﻿@page "/admin/Semestry/Lista"
+@using BaseLibrary.Contracts
+@using BaseLibrary.Models
+@layout DashLayout
+@inject ISessionRepository SessionService
+@inject NavigationManager NavManager
+
+<h3>Lista Semestrów</h3>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" />
+</RadzenStack>
+
+<RadzenDataGrid @ref="grid" Data="@sessions" AllowPaging="true" AllowSorting="true" PageSize="10">
+    <Columns>
+        <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="SessionYear" Title="SessionYear" />
+        <RadzenDataGridColumn Property="SessionType" Title="SessionType" />
+        <RadzenDataGridColumn Property="Students" Title="Students" />
+        <RadzenDataGridColumn Property="Lessons" Title="Lessons"  />
+        <RadzenDataGridColumn Title="Akcja" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
+            <Template Context="session">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(session))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    RadzenDataGrid<Session> grid;
+    IEnumerable<Session> sessions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        sessions = await SessionService.GetAll();
+
+    }
+
+
+    private async void DeleteRow(Session session)
+    {
+        var response = await SessionService.Delete(session.Id);
+    }
+
+}

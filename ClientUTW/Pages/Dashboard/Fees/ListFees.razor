@@ -1,0 +1,48 @@
+﻿@page "/admin/Opłaty/Lista"
+@using BaseLibrary.Contracts
+@using BaseLibrary.Models
+@layout DashLayout
+@inject IFeeRepository FeeService
+@inject NavigationManager NavManager
+
+<h3>Lista Opłat</h3>
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" />
+</RadzenStack>
+
+<RadzenDataGrid @ref="grid" Data="@fees" AllowPaging="true" AllowSorting="true" PageSize="10">
+    <Columns>
+        <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
+        <RadzenDataGridColumn Property="IssueDate" Title="Issue Date" />
+        <RadzenDataGridColumn Property="PaymentDate" Title="Payment Date" />
+        <RadzenDataGridColumn Property="Details" Title="Details" />
+        <RadzenDataGridColumn Property="isPaid" Title="isPaid" />
+        <RadzenDataGridColumn Property="Student" Title="Student" />
+        <RadzenDataGridColumn Title="Akcja" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
+            <Template Context="fee">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(fee))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    RadzenDataGrid<Fee> grid;
+    IEnumerable<Fee> fees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        fees = await FeeService.GetAll();
+
+    }
+
+
+    private async void DeleteRow(Fee fee)
+    {
+        var response = await FeeService.Delete(fee.Id);
+    }
+
+}
