@@ -8,16 +8,15 @@ namespace ClientUTW.Service;
 
 public class StudentService : IStudentRepository
 {
-    private const string BaseUrl = "api/Account";
+    private const string BaseUrl = "api/Students";
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorageService;
     private readonly NotificationService _notificationService;
     
-    public StudentService(HttpClient httpClient, ILocalStorageService localStorageService, NotificationService notificationService)
+    public StudentService(HttpClient httpClient, ILocalStorageService localStorageService)
     {
         this._httpClient = httpClient;
         this._localStorageService = localStorageService;
-        _notificationService = notificationService;
     }
     
     public async Task<List<Student>> GetAll()
@@ -25,7 +24,7 @@ public class StudentService : IStudentRepository
         string? token = await _localStorageService.GetItemAsStringAsync("token");
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        var response = await _httpClient.GetAsync("api/Students");
+        var response = await _httpClient.GetAsync($"{BaseUrl}");
 
         
         if (!response.IsSuccessStatusCode)
@@ -64,7 +63,7 @@ public class StudentService : IStudentRepository
         string? token = await _localStorageService.GetItemAsStringAsync("token");
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        var response = await _httpClient.DeleteAsync($"api/Students/{studentID}");
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{studentID}");
         
         if (!response.IsSuccessStatusCode)
             return null!;
