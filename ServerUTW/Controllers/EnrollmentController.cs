@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
 using ServerUTW.Data;
+using BaseLibrary.Contracts;
 
 namespace ServerUTW.Controllers
 {
@@ -14,23 +15,23 @@ namespace ServerUTW.Controllers
     [ApiController]
     public class EnrollmentController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IEnrollmentRepository _repository;
 
-        public EnrollmentController(AppDbContext context)
+        public EnrollmentController(IEnrollmentRepository context)
         {
-            _context = context;
+            _repository = context;
         }
         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Enrolllment>>> GetEnrolllments()
         {
-            return await _context.Enrolllments.ToListAsync();
+            return await _repository.GetAll();
         }
         
         [HttpGet("{id}")]
         public async Task<ActionResult<Enrolllment>> GetEnrolllment(int id)
         {
-            var enrolllment = await _context.Enrolllments.FindAsync(id);
+            var enrolllment = await _repository.GetById(id);
 
             if (enrolllment == null)
             {
@@ -73,8 +74,7 @@ namespace ServerUTW.Controllers
         [HttpPost]
         public async Task<ActionResult<Enrolllment>> PostEnrolllment(Enrolllment enrolllment)
         {
-            _context.Enrolllments.Add(enrolllment);
-            await _context.SaveChangesAsync();
+           var enrollmentAdded = await _repository.Insert(enrolllment);
 
             return CreatedAtAction("GetEnrolllment", new { id = enrolllment.Id }, enrolllment);
         }
@@ -82,21 +82,17 @@ namespace ServerUTW.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEnrolllment(int id)
         {
-            var enrolllment = await _context.Enrolllments.FindAsync(id);
-            if (enrolllment == null)
+            var enrollment = await _repository.GetById(id);
+            if (enrollment == null)
             {
                 return NotFound();
             }
 
-            _context.Enrolllments.Remove(enrolllment);
-            await _context.SaveChangesAsync();
+            var enrollmentDeleted = await _repository.Delete(enrollment.Id);
 
-            return NoContent();
+            return Ok(new { Message = "Pomyœlnie usuniêto zapis", Enrollment = enrollmentDeleted });
         }
 
-        private bool EnrolllmentExists(int id)
-        {
-            return _context.Enrolllments.Any(e => e.Id == id);
-        }
+        
     }
 }
