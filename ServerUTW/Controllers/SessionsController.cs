@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
 using ServerUTW.Data;
 using BaseLibrary.Contracts;
+using BaseLibrary.GenericModels;
+using BaseLibrary.Responses;
 
 namespace ServerUTW.Controllers
 {
@@ -43,36 +45,20 @@ namespace ServerUTW.Controllers
             return session;
         }
 
-       
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutSession(int id, Session session)
+        
+        [HttpPut("{id:int}")]
+        public async Task<EntityResponse> PutStudent(int id, Session session)
         {
             if (id != session.Id)
             {
-                return BadRequest();
+                return new EntityResponse(false, "Bad ID", null);
             }
 
-            _context.Entry(session).State = EntityState.Modified;
+            var result = await _repository.Update(id, session);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SessionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return new EntityResponse(true, "Updated successfully", Generics.SerializeObj(result));
         }
-
+        
        
         [HttpPost]
         public async Task<ActionResult<Session>> PostSession(Session session)

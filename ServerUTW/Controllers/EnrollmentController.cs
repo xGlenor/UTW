@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
 using ServerUTW.Data;
 using BaseLibrary.Contracts;
+using BaseLibrary.GenericModels;
+using BaseLibrary.Responses;
 
 namespace ServerUTW.Controllers
 {
@@ -41,35 +43,19 @@ namespace ServerUTW.Controllers
             return enrolllment;
         }
         
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEnrolllment(int id, Enrolllment enrolllment)
+        [HttpPut("{id:int}")]
+        public async Task<EntityResponse> PutStudent(int id, Enrolllment enrolllment)
         {
             if (id != enrolllment.Id)
             {
-                return BadRequest();
+                return new EntityResponse(false, "Bad ID", null);
             }
 
-            _context.Entry(enrolllment).State = EntityState.Modified;
+            var result = await _repository.Update(id, enrolllment);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EnrolllmentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return new EntityResponse(true, "Updated successfully", Generics.SerializeObj(result));
         }
-
+        
 
         [HttpPost]
         public async Task<ActionResult<Enrolllment>> PostEnrolllment(Enrolllment enrolllment)
@@ -90,7 +76,7 @@ namespace ServerUTW.Controllers
 
             var enrollmentDeleted = await _repository.Delete(enrollment.Id);
 
-            return Ok(new { Message = "Pomyœlnie usuniêto zapis", Enrollment = enrollmentDeleted });
+            return Ok(new { Message = "PomyÅ›lnie usuniÄ™to zapis", Enrollment = enrollmentDeleted });
         }
 
         
