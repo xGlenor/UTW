@@ -1,6 +1,7 @@
 ﻿using BaseLibrary.Contracts;
 using BaseLibrary.GenericModels;
 using BaseLibrary.Models;
+using BaseLibrary.Responses;
 using Blazored.LocalStorage;
 using Radzen;
 
@@ -45,7 +46,7 @@ public class StudentService : IStudentRepository
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         var response = await _httpClient
-            .PostAsync($"api/Students",
+            .PostAsync($"{BaseUrl}",
                 Generics.GenerateStringContent(
                     Generics.SerializeObj(student)));
 
@@ -53,9 +54,23 @@ public class StudentService : IStudentRepository
         return Generics.DeserializeJsonString<Student>(result);
     }
 
-    public Task<Student> Update(int id, Student student)
+    public async Task<Student> Update(int studentID, Student student)
     {
-        throw new NotImplementedException();
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _httpClient.PutAsync($"{BaseUrl}/{studentID}",
+            Generics.GenerateStringContent(
+                Generics.SerializeObj(student)));
+
+        var readAsString = await response.Content.ReadAsStringAsync();
+        var result = Generics.DeserializeJsonString<EntityResponse>(readAsString);
+
+        if (result.flag)
+            return Generics.DeserializeJsonString<Student>(result.objectJson);
+        
+        return null!;
     }
 
     public async Task<Student> Delete(int studentID)

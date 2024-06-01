@@ -16,9 +16,7 @@
         <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
         <RadzenDataGridColumn Property="SessionYear" Title="SessionYear" />
         <RadzenDataGridColumn Property="SessionType" Title="SessionType" />
-        <RadzenDataGridColumn Property="Students" Title="Students" />
-        <RadzenDataGridColumn Property="Lessons" Title="Lessons"  />
-        <RadzenDataGridColumn Title="Akcja" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
+        <RadzenDataGridColumn Title="Akcja" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
             <Template Context="session">
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(session))" @onclick:stopPropagation="true">
                 </RadzenButton>

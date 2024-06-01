@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseLibrary.Contracts;
+using BaseLibrary.GenericModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
-using Newtonsoft.Json;
-using ServerUTW.Data;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using BaseLibrary.Responses;
 
 namespace ServerUTW.Controllers
 {
@@ -56,6 +54,19 @@ namespace ServerUTW.Controllers
             return CreatedAtAction("GetStudent", new { id = student.Id }, student);
         }
 
+        [HttpPut("{id:int}")]
+        public async Task<EntityResponse> PutStudent(int id, Student student)
+        {
+            if (id != student.Id)
+            {
+                return new EntityResponse(false, "Bad ID", null);
+            }
+
+            var result = await _repository.Update(id, student);
+
+            return new EntityResponse(true, "Updated successfully", Generics.SerializeObj(result));
+        }
+        
         // DELETE: api/Students/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)

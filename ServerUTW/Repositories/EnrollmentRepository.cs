@@ -29,7 +29,7 @@ public class EnrollmentRepository : IEnrollmentRepository
 
     public async Task<List<Enrolllment>> GetAll()
     {
-        return await _dbContext.Enrolllments.ToListAsync();
+        return await _dbContext.Enrolllments.Include("Student").Include("Lesson").ToListAsync();
     }
 
     public async Task<Enrolllment?> GetById(int enrollmentID)

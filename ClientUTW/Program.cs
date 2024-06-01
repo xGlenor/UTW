@@ -23,6 +23,6 @@ builder.Services.AddScoped<IEnrollmentRepository, EnrollmentService>();
 builder.Services.AddScoped<IFeeRepository, FeeService>();
 builder.Services.AddScoped<ILessonRepository, LessonService>();
 builder.Services.AddScoped<ISessionRepository, SessionService>();
-
+    
 
 await builder.Build().RunAsync();

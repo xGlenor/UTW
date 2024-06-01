@@ -4,44 +4,168 @@
 @layout DashLayout
 @inject IStudentRepository StudentService
 @inject NavigationManager NavManager
+@inject NotificationService NotificationService
 
-<h3>Lista Studentów</h3>
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Studenta" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && studentsToInsert.Count() > 0)" />
 </RadzenStack>
 
-<RadzenDataGrid @ref="grid" Data="@students" AllowPaging="true" AllowSorting="true" PageSize="10">
+<RadzenDataGrid @ref="studentsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+                Data="@students" TItem="Student" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
-        <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn Property="FirstName" Title="First Name" />
-        <RadzenDataGridColumn Property="LastName" Title="Last Name" />
-        <RadzenDataGridColumn Property="Address" Title="Address"  />
-        <RadzenDataGridColumn Property="Birthdate" Title="Birth Date" FormatString="{0:d}" />
-        <RadzenDataGridColumn Title="Akcja" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true" />
+        <RadzenDataGridColumn Property="FirstName" Title="Imię">
+            <EditTemplate Context="student">
+                <RadzenTextBox @bind-Value="student.FirstName" Style="width:200px; display: block" Name="FirstName" aria-label="Wpisz Imię" />
+                <RadzenRequiredValidator Text="Imię jest wymagane" Component="FirstName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="LastName" Title="Nazwisko">
+            <EditTemplate Context="student">
+                <RadzenTextBox @bind-Value="student.LastName" Style="width:200px; display: block" Name="LastName" aria-label="Wpisz Nazwisko" />
+                <RadzenRequiredValidator Text="Nazwisko jest wymagane" Component="LastName" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Address" Title="Adres">
+            <EditTemplate Context="student">
+                <RadzenTextBox @bind-Value="student.Address" Style="width:200px; display: block" Name="Address" aria-label="Uzupełnij Adres" />
+                <RadzenRequiredValidator Text="Adres jest wymagany" Component="Address" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Birthdate" Title="Data Urodzenia" Width="200px">
             <Template Context="student">
+                @String.Format("{0:d}", student.Birthdate)
+            </Template>
+            <EditTemplate Context="student">
+                <RadzenDatePicker @bind-Value="student.Birthdate" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Wybierz datę urodzenia" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Context="student" Filterable="false" Title="Akcja" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="10rem">
+            <Template Context="student">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(student))" @onclick:stopPropagation="true">
+                </RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(student))" @onclick:stopPropagation="true">
                 </RadzenButton>
             </Template>
+            <EditTemplate Context="student">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(student))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(student))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(student))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 
 @code {
-    RadzenDataGrid<Student> grid;
+    RadzenDataGrid<Student> studentsGrid;
     IEnumerable<Student> students;
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<Student> studentsToInsert = new List<Student>();
+    List<Student> studentsToUpdate = new List<Student>();
+
+    void Reset()
+    {
+        studentsToInsert.Clear();
+        studentsToUpdate.Clear();
+    }
+
+    void Reset(Student student)
+    {
+        studentsToInsert.Remove(student);
+        studentsToUpdate.Remove(student);
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
         students = await StudentService.GetAll();
         
     }
-    
-    
-    private async void DeleteRow(Student student)
+
+    async Task EditRow(Student student)
     {
-        var response = await StudentService.Delete(student.Id);
+        if (editMode == DataGridEditMode.Single && studentsToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        studentsToUpdate.Add(student);
+        await studentsGrid.EditRow(student);
     }
 
+    void OnUpdateRow(Student student)
+    {
+        Reset(student);
+
+        StudentService.Update(student.Id, student);
+        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"{student.FirstName} {student.LastName}");
+    }
+
+    async Task SaveRow(Student student)
+    {
+        await studentsGrid.UpdateRow(student);
+    }
+
+    void CancelEdit(Student student)
+    {
+        Reset(student);
+
+        studentsGrid.CancelEditRow(student);
+    }
+
+    async Task DeleteRow(Student student)
+    {
+        Reset(student);
+
+        if (students.Contains(student))
+        {
+            await StudentService.Delete(student.Id);
+            await studentsGrid.Reload();
+            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"{student.FirstName} {student.LastName}");
+            await Refresh();
+        }
+        else
+        {
+            studentsGrid.CancelEditRow(student);
+            await studentsGrid.Reload();
+        }
+    }
+
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var student = new Student();
+        studentsToInsert.Add(student);
+        await studentsGrid.InsertRow(student);
+    }
+
+    void OnCreateRow(Student student)
+    {
+        StudentService.Insert(student);
+        studentsToInsert.Remove(student);
+        SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"{student.FirstName} {student.LastName}");
+    }
+
+    void SendNotification(NotificationSeverity severity, string message, string detail)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = message, Detail = detail, CloseOnClick = true, Payload = DateTime.Now });
+    }
+    
+    private async Task Refresh() 
+    { 
+        students = await StudentService.GetAll();
+        await studentsGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    } 
 }

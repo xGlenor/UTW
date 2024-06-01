@@ -22,7 +22,7 @@
         <RadzenDataGridColumn Property="NumberOfPlaces" Title="NumberOfPlaces" />
         <RadzenDataGridColumn Property="Price" Title="Price" />
         <RadzenDataGridColumn Property="Teachers" Title="Teachers" />
-        <RadzenDataGridColumn Title="Akcja" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
+        <RadzenDataGridColumn Title="Akcja" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
             <Template Context="lesson">
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(lesson))" @onclick:stopPropagation="true">
                 </RadzenButton>
