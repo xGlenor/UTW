@@ -1,45 +1,155 @@
 ﻿@page "/admin/Semestry/Lista"
 @using BaseLibrary.Contracts
+@using BaseLibrary.enums
 @using BaseLibrary.Models
 @layout DashLayout
 @inject ISessionRepository SessionService
-@inject NavigationManager NavManager
+@inject NotificationService NotificationService
 
-<h3>Lista Semestrów</h3>
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Semestr" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && sesssionsToInsert.Any())" />
 </RadzenStack>
 
-<RadzenDataGrid @ref="grid" Data="@sessions" AllowPaging="true" AllowSorting="true" PageSize="10">
+<RadzenDataGrid @ref="sessionsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+                Data="@sesssions" TItem="Session" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
-        <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn Property="SessionYear" Title="SessionYear" />
-        <RadzenDataGridColumn Property="SessionType" Title="SessionType" />
-        <RadzenDataGridColumn Title="Akcja" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true" />
+        <RadzenDataGridColumn Property="SessionYear" Title="Rok">
+            <EditTemplate Context="session">
+                <RadzenNumeric ShowUpDown="false" TValue="int" @bind-Value="@session.SessionYear" Name="SessionYear" Placeholder="Wprowadz rok" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="SessionType" Title="Typ">
+            <EditTemplate Context="session">
+                <RadzenDropDown Data="@(Enum.GetValues(typeof(SessionType)).Cast<Enum>())" @bind-Value="@session.SessionType" Name="SessionType"/>
+            </EditTemplate>
+
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Context="session" Filterable="false" Title="Akcja" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="10rem">
             <Template Context="session">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(session))" @onclick:stopPropagation="true">
+                </RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(session))" @onclick:stopPropagation="true">
                 </RadzenButton>
             </Template>
+            <EditTemplate Context="session">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(session))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(session))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(session))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 
+
 @code {
-    RadzenDataGrid<Session> grid;
-    IEnumerable<Session> sessions;
+    RadzenDataGrid<Session> sessionsGrid;
+    IEnumerable<Session> sesssions;
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<Session> sesssionsToInsert = new List<Session>();
+    List<Session> sesssionsToUpdate = new List<Session>();
+
+    void Reset()
+    {
+        sesssionsToInsert.Clear();
+        sesssionsToUpdate.Clear();
+    }
+
+    void Reset(Session session)
+    {
+        sesssionsToInsert.Remove(session);
+        sesssionsToUpdate.Remove(session);
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        sessions = await SessionService.GetAll();
 
+        sesssions = await SessionService.GetAll();
     }
 
-
-    private async void DeleteRow(Session session)
+    async Task EditRow(Session session)
     {
-        var response = await SessionService.Delete(session.Id);
+        if (editMode == DataGridEditMode.Single && sesssionsToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        sesssionsToUpdate.Add(session);
+        await sessionsGrid.EditRow(session);
     }
 
+    void OnUpdateRow(Session session)
+    {
+        Reset(session);
+
+        SessionService.Update(session.Id, session);
+        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"Semestr: {session.SessionType} Rok: {session.SessionYear}");
+    }
+
+    async Task SaveRow(Session session)
+    {
+        await sessionsGrid.UpdateRow(session);
+    }
+
+    void CancelEdit(Session session)
+    {
+        Reset(session);
+        sessionsGrid.CancelEditRow(session);
+    }
+
+    async Task DeleteRow(Session session)
+    {
+        Reset(session);
+
+        if (sesssions.Contains(session))
+        {
+            await SessionService.Delete(session.Id);
+            await sessionsGrid.Reload();
+            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"Semestr: {session.SessionType} Rok: {session.SessionYear}");
+            await Refresh();
+        }
+        else
+        {
+            sessionsGrid.CancelEditRow(session);
+            await sessionsGrid.Reload();
+        }
+    }
+
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var session = new Session();
+        sesssionsToInsert.Add(session);
+        await sessionsGrid.InsertRow(session);
+    }
+
+    void OnCreateRow(Session session)
+    {
+        SessionService.Insert(session);
+        sesssionsToInsert.Remove(session);
+        SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"Semestr: {session.SessionType} Rok: {session.SessionYear}");
+    }
+
+    void SendNotification(NotificationSeverity severity, string message, string detail)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = message, Detail = detail, CloseOnClick = true, Payload = DateTime.Now });
+    }
+
+    private async Task Refresh()
+    {
+        sesssions = await SessionService.GetAll();
+        await sessionsGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
 }

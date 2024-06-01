@@ -89,6 +89,10 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IFeeRepository, FeeRepository>();
+builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 
 /*
 |--------------------------------------------------------------------------
