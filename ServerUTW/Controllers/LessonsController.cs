@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
 using ServerUTW.Data;
+using BaseLibrary.Contracts;
 
 namespace ServerUTW.Controllers
 {
@@ -14,25 +15,25 @@ namespace ServerUTW.Controllers
     [ApiController]
     public class LessonsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ILessonRepository _repository;
 
-        public LessonsController(AppDbContext context)
+        public LessonsController(ILessonRepository context)
         {
-            _context = context;
+            _repository = context;
         }
 
         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lesson>>> GetLessons()
         {
-            return await _context.Lessons.ToListAsync();
+            return await _repository.GetAll();
         }
 
         
         [HttpGet("{id}")]
         public async Task<ActionResult<Lesson>> GetLesson(int id)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
+            var lesson = await _repository.GetById(id);
 
             if (lesson == null)
             {
@@ -76,8 +77,7 @@ namespace ServerUTW.Controllers
         [HttpPost]
         public async Task<ActionResult<Lesson>> PostLesson(Lesson lesson)
         {
-            _context.Lessons.Add(lesson);
-            await _context.SaveChangesAsync();
+           var lessonAdded = await _repository.Insert(lesson);
 
             return CreatedAtAction("GetLesson", new { id = lesson.Id }, lesson);
         }
@@ -86,21 +86,17 @@ namespace ServerUTW.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLesson(int id)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
+            var lesson = await _repository.GetById(id);
             if (lesson == null)
             {
                 return NotFound();
             }
 
-            _context.Lessons.Remove(lesson);
-            await _context.SaveChangesAsync();
+            var lessonDeleted = await _repository.Delete(lesson.Id);
 
-            return NoContent();
+            return Ok(new { Message = "Pomyślnie usunięto zajecia", Lesson = lessonDeleted });
         }
 
-        private bool LessonExists(int id)
-        {
-            return _context.Lessons.Any(e => e.Id == id);
-        }
+        
     }
 }

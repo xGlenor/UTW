@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
 using ServerUTW.Data;
+using BaseLibrary.Contracts;
 
 namespace ServerUTW.Controllers
 {
@@ -14,25 +15,25 @@ namespace ServerUTW.Controllers
     [ApiController]
     public class FeesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IFeeRepository _repository;
 
-        public FeesController(AppDbContext context)
+        public FeesController(IFeeRepository context)
         {
-            _context = context;
+            _repository = context;
         }
 
         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Fee>>> GetFees()
         {
-            return await _context.Fees.ToListAsync();
+            return await _repository.GetAll();
         }
 
         
         [HttpGet("{id}")]
         public async Task<ActionResult<Fee>> GetFee(int id)
         {
-            var fee = await _context.Fees.FindAsync(id);
+            var fee = await _repository.GetById(id);
 
             if (fee == null)
             {
@@ -75,8 +76,7 @@ namespace ServerUTW.Controllers
         [HttpPost]
         public async Task<ActionResult<Fee>> PostFee(Fee fee)
         {
-            _context.Fees.Add(fee);
-            await _context.SaveChangesAsync();
+            var FeeAdded = await _repository.Insert(fee);
 
             return CreatedAtAction("GetFee", new { id = fee.Id }, fee);
         }
@@ -85,21 +85,17 @@ namespace ServerUTW.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFee(int id)
         {
-            var fee = await _context.Fees.FindAsync(id);
+            var fee = await _repository.GetById(id);
             if (fee == null)
             {
                 return NotFound();
             }
 
-            _context.Fees.Remove(fee);
-            await _context.SaveChangesAsync();
+            var feeDeleted = await _repository.Delete(fee.Id);
 
-            return NoContent();
+            return Ok(new { Message = "Pomyślnie usunięto opłate", Fee = feeDeleted });
         }
 
-        private bool FeeExists(int id)
-        {
-            return _context.Fees.Any(e => e.Id == id);
-        }
+        
     }
 }

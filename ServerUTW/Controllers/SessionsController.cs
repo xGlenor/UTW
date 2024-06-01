@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
 using ServerUTW.Data;
+using BaseLibrary.Contracts;
 
 namespace ServerUTW.Controllers
 {
@@ -14,25 +15,25 @@ namespace ServerUTW.Controllers
     [ApiController]
     public class SessionsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ISessionRepository _repository;
 
-        public SessionsController(AppDbContext context)
+        public SessionsController(ISessionRepository context)
         {
-            _context = context;
+            _repository = context;
         }
 
         
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Session>>> GetSessions()
         {
-            return await _context.Sessions.ToListAsync();
+            return await _repository.GetAll();
         }
 
    
         [HttpGet("{id}")]
         public async Task<ActionResult<Session>> GetSession(int id)
         {
-            var session = await _context.Sessions.FindAsync(id);
+            var session = await _repository.GetById(id);
 
             if (session == null)
             {
@@ -76,8 +77,7 @@ namespace ServerUTW.Controllers
         [HttpPost]
         public async Task<ActionResult<Session>> PostSession(Session session)
         {
-            _context.Sessions.Add(session);
-            await _context.SaveChangesAsync();
+            var sessionAdded = await _repository.Insert(session);
 
             return CreatedAtAction("GetSession", new { id = session.Id }, session);
         }
@@ -86,21 +86,17 @@ namespace ServerUTW.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSession(int id)
         {
-            var session = await _context.Sessions.FindAsync(id);
+            var session = await _repository.GetById(id);
             if (session == null)
             {
                 return NotFound();
             }
 
-            _context.Sessions.Remove(session);
-            await _context.SaveChangesAsync();
+            var sessionDeleted = await _repository.Delete(session.Id);
 
-            return NoContent();
+            return Ok(new { Message = "Pomyślnie usunięto semestr", Session = sessionDeleted });
         }
 
-        private bool SessionExists(int id)
-        {
-            return _context.Sessions.Any(e => e.Id == id);
-        }
+        
     }
 }
