@@ -3,49 +3,185 @@
 @using BaseLibrary.Models
 @layout DashLayout
 @inject ILessonRepository LessonService
-@inject NavigationManager NavManager
+@inject NotificationService NotificationService
 
-<h3>Lista Zajęć</h3>
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Zajecia" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && lessonsToInsert.Any())" />
 </RadzenStack>
 
-<RadzenDataGrid @ref="grid" Data="@lessons" AllowPaging="true" AllowSorting="true" PageSize="10">
+<RadzenDataGrid @ref="lessonsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+                Data="@lessons" TItem="Lesson" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
-        <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn Property="Name" Title="Name" />
-        <RadzenDataGridColumn Property="Description" Title="Description" />
-        <RadzenDataGridColumn Property="LessonDate" Title="LessonDate" />
-        <RadzenDataGridColumn Property="Classroom" Title="Classroom" />
-        <RadzenDataGridColumn Property="Address" Title="Address" />
-        <RadzenDataGridColumn Property="NumberOfPlaces" Title="NumberOfPlaces" />
-        <RadzenDataGridColumn Property="Price" Title="Price" />
-        <RadzenDataGridColumn Property="Teachers" Title="Teachers" />
-        <RadzenDataGridColumn Title="Akcja" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+        <RadzenDataGridColumn Property="Name" Title="Nazwa">
+            <EditTemplate Context="lesson">
+                <RadzenTextBox @bind-Value="lesson.Name" Style="width:200px; display: block" Name="Name" aria-label="Wpisz nazwe" />
+                <RadzenRequiredValidator Text="Nazwa jest wymagana" Component="Name" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Description" Title="Opis">
+            <EditTemplate Context="lesson">
+                <RadzenTextBox @bind-Value="lesson.Description" Style="width:200px; display: block" Name="Description" aria-label="Wpisz opis" />
+                <RadzenRequiredValidator Text="Opis jest wymagany" Component="Description" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="LessonDate" Title="Data zajec" Width="200px">
             <Template Context="lesson">
+                @String.Format("{0:d}", lesson.LessonDate)
+            </Template>
+            <EditTemplate Context="lesson">
+                <RadzenDatePicker @bind-Value="lesson.LessonDate" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Wybierz datę zajec" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="Classroom" Title="Sala">
+            <EditTemplate Context="lesson">
+                <RadzenTextBox @bind-Value="lesson.Classroom" Style="width:200px; display: block" Name="Classroom" aria-label="Wpisz sale" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="Address" Title="Adres">
+            <EditTemplate Context="lesson">
+                <RadzenTextBox @bind-Value="lesson.Address" Style="width:200px; display: block" Name="Address" aria-label="Wpisz adres" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="NumberOfPlaces" Title="Liczba miejsc">
+            <EditTemplate Context="lesson">
+                <RadzenNumeric ShowUpDown="false" TValue="int?" @bind-Value="@lesson.NumberOfPlaces" Name="NumberOfPlaces" Placeholder="Wprowadz liczbe miejsc" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="Price" Title="Cena"> 
+            <EditTemplate Context="lesson"> 
+                <RadzenNumeric TValue="decimal?" @bind-Value="@lesson.Price" Name="Price" Placeholder="Wprowadz cenę" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })" /> 
+
+                </EditTemplate> 
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Context="lesson" Filterable="false" Title="Akcja" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="10rem">
+            <Template Context="lesson">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(lesson))" @onclick:stopPropagation="true">
+                </RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(lesson))" @onclick:stopPropagation="true">
                 </RadzenButton>
             </Template>
+            <EditTemplate Context="lesson">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(lesson))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(lesson))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(lesson))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 
 @code {
-    RadzenDataGrid<Lesson> grid;
+    RadzenDataGrid<Lesson> lessonsGrid;
     IEnumerable<Lesson> lessons;
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<Lesson> lessonsToInsert = new List<Lesson>();
+    List<Lesson> lessonsToUpdate = new List<Lesson>();
+
+    void Reset()
+    {
+        lessonsToInsert.Clear();
+        lessonsToUpdate.Clear();
+    }
+
+    void Reset(Lesson lesson)
+    {
+        lessonsToInsert.Remove(lesson);
+        lessonsToUpdate.Remove(lesson);
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
         lessons = await LessonService.GetAll();
-
     }
 
-
-    private async void DeleteRow(Lesson lesson)
+    async Task EditRow(Lesson lesson)
     {
-        var response = await LessonService.Delete(lesson.Id);
+        if (editMode == DataGridEditMode.Single && lessonsToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        lessonsToUpdate.Add(lesson);
+        await lessonsGrid.EditRow(lesson);
     }
 
+    void OnUpdateRow(Lesson lesson)
+    {
+        Reset(lesson);
+
+        LessonService.Update(lesson.Id, lesson);
+        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"Zajecia: {lesson.Name} DataZajec: {lesson.LessonDate}");
+    }
+
+    async Task SaveRow(Lesson lesson)
+    {
+        await lessonsGrid.UpdateRow(lesson);
+    }
+
+    void CancelEdit(Lesson lesson)
+    {
+        Reset(lesson);
+        lessonsGrid.CancelEditRow(lesson);
+    }
+
+    async Task DeleteRow(Lesson lesson)
+    {
+        Reset(lesson);
+
+        if (lessons.Contains(lesson))
+        {
+            await LessonService.Delete(lesson.Id);
+            await lessonsGrid.Reload();
+            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"Zajecia: {lesson.Name} DataZajec: {lesson.LessonDate}");
+            await Refresh();
+        }
+        else
+        {
+            lessonsGrid.CancelEditRow(lesson);
+            await lessonsGrid.Reload();
+        }
+    }
+
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var lesson = new Lesson();
+        lessonsToInsert.Add(lesson);
+        await lessonsGrid.InsertRow(lesson);
+    }
+
+    void OnCreateRow(Lesson lesson)
+    {
+        LessonService.Insert(lesson);
+        lessonsToInsert.Remove(lesson);
+        SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"Zajecia: {lesson.Name} DataZajec: {lesson.LessonDate}");
+    }
+
+    void SendNotification(NotificationSeverity severity, string message, string detail)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = message, Detail = detail, CloseOnClick = true, Payload = DateTime.Now });
+    }
+
+    private async Task Refresh()
+    {
+        lessons = await LessonService.GetAll();
+        await lessonsGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
 }

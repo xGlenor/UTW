@@ -3,46 +3,160 @@
 @using BaseLibrary.Models
 @layout DashLayout
 @inject IFeeRepository FeeService
-@inject NavigationManager NavManager
+@inject NotificationService NotificationService
 
-<h3>Lista Opłat</h3>
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Add New Order" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Opłate" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && feesToInsert.Any())" />
 </RadzenStack>
 
-<RadzenDataGrid @ref="grid" Data="@fees" AllowPaging="true" AllowSorting="true" PageSize="10">
+<RadzenDataGrid @ref="feesGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+                Data="@fees" TItem="Fee" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
-        <RadzenDataGridColumn Property="Id" Filterable="false" Title="ID" Frozen="true" Width="80px" TextAlign="TextAlign.Center" />
-        <RadzenDataGridColumn Property="IssueDate" Title="Issue Date" />
-        <RadzenDataGridColumn Property="PaymentDate" Title="Payment Date" />
-        <RadzenDataGridColumn Property="Details" Title="Details" />
-        <RadzenDataGridColumn Property="isPaid" Title="isPaid" />
-        <RadzenDataGridColumn Property="Student" Title="Student" />
-        <RadzenDataGridColumn Title="Akcja" Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="100px">
-            <Template Context="fee">
-                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(fee))" @onclick:stopPropagation="true">
-                </RadzenButton>
-            </Template>
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true" />
+        <RadzenDataGridColumn Property="StudentId" Title="ID studenta">
+            <EditTemplate Context="fee">
+                <RadzenNumeric ShowUpDown="false" TValue="int" @bind-Value="@fee.StudentId" Name="StudentId" Placeholder="Wprowadz ID studenta" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })" />
+            </EditTemplate>
         </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="IssueDate" Title="Data wydania" Width="200px">
+            <Template Context="fee">
+                @String.Format("{0:d}", fee.IssueDate)
+            </Template>
+            <EditTemplate Context="fee">
+                <RadzenDatePicker @bind-Value="fee.IssueDate" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Wybierz datę wydania" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="PaymentDate" Title="Data platnosci" Width="200px">
+            <Template Context="fee">
+                @String.Format("{0:d}", fee.PaymentDate)
+            </Template>
+            <EditTemplate Context="fee">
+                <RadzenDatePicker @bind-Value="fee.PaymentDate" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Wybierz datę platnosci" }})" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        
+        <RadzenDataGridColumn Property="Details" Title="Szczegoly">
+            <EditTemplate Context="fee">
+                <RadzenTextBox @bind-Value="fee.Details" Style="width:200px; display: block" Name="Details" aria-label="Wpisz szczegoly" />
+                <RadzenRequiredValidator Text="Szczegoly sa wymagane" Component="Details" Popup="true" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="isPaid" Title="Zaplacone"> 
+                <EditTemplate Context="fee"> 
+                    <RadzenCheckBox @bind-Value="fee.isPaid" Name="isPaid" TValue="bool?" /> 
+                </EditTemplate> 
+        </RadzenDataGridColumn>
+
     </Columns>
 </RadzenDataGrid>
 
 @code {
-    RadzenDataGrid<Fee> grid;
+    RadzenDataGrid<Fee> feesGrid;
     IEnumerable<Fee> fees;
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<Fee> feesToInsert = new List<Fee>();
+    List<Fee> feesToUpdate = new List<Fee>();
+
+    void Reset()
+    {
+        feesToInsert.Clear();
+        feesToUpdate.Clear();
+    }
+
+    void Reset(Fee fee)
+    {
+        feesToInsert.Remove(fee);
+        feesToUpdate.Remove(fee);
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
         fees = await FeeService.GetAll();
-
     }
 
-
-    private async void DeleteRow(Fee fee)
+    async Task EditRow(Fee fee)
     {
-        var response = await FeeService.Delete(fee.Id);
+        if (editMode == DataGridEditMode.Single && feesToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        feesToUpdate.Add(fee);
+        await feesGrid.EditRow(fee);
     }
 
+    void OnUpdateRow(Fee fee)
+    {
+        Reset(fee);
+
+        FeeService.Update(fee.Id, fee);
+        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"Opłata: {fee.IssueDate} StudentId: {fee.StudentId}");
+    }
+
+    async Task SaveRow(Fee fee)
+    {
+        await feesGrid.UpdateRow(fee);
+    }
+
+    void CancelEdit(Fee fee)
+    {
+        Reset(fee);
+        feesGrid.CancelEditRow(fee);
+    }
+
+    async Task DeleteRow(Fee fee)
+    {
+        Reset(fee);
+
+        if (fees.Contains(fee))
+        {
+            await FeeService.Delete(fee.Id);
+            await feesGrid.Reload();
+            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"Opłata: {fee.IssueDate} StudentId: {fee.StudentId}");
+            await Refresh();
+        }
+        else
+        {
+            feesGrid.CancelEditRow(fee);
+            await feesGrid.Reload();
+        }
+    }
+
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var fee = new Fee();
+        feesToInsert.Add(fee);
+        await feesGrid.InsertRow(fee);
+    }
+
+    void OnCreateRow(Fee fee)
+    {
+        FeeService.Insert(fee);
+        feesToInsert.Remove(fee);
+        SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"Opłata: {fee.IssueDate} StudentId: {fee.StudentId}");
+    }
+
+    void SendNotification(NotificationSeverity severity, string message, string detail)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = message, Detail = detail, CloseOnClick = true, Payload = DateTime.Now });
+    }
+
+    private async Task Refresh()
+    {
+        fees = await FeeService.GetAll();
+        await feesGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
 }
