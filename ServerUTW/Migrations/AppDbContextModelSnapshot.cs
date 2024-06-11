@@ -35,9 +35,6 @@ namespace ServerUTW.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("LessonId");
@@ -421,13 +418,13 @@ namespace ServerUTW.Migrations
             modelBuilder.Entity("BaseLibrary.Models.Enrolllment", b =>
                 {
                     b.HasOne("BaseLibrary.Models.Lesson", "Lesson")
-                        .WithMany()
+                        .WithMany("Enrolllments")
                         .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BaseLibrary.Models.Student", "Student")
-                        .WithMany()
+                        .WithMany("Enrolllments")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -450,9 +447,11 @@ namespace ServerUTW.Migrations
 
             modelBuilder.Entity("BaseLibrary.Models.Lesson", b =>
                 {
-                    b.HasOne("BaseLibrary.Models.Session", null)
+                    b.HasOne("BaseLibrary.Models.Session", "Session")
                         .WithMany("Lessons")
                         .HasForeignKey("SessionId");
+
+                    b.Navigation("Session");
                 });
 
             modelBuilder.Entity("BaseLibrary.Models.Student", b =>
@@ -522,6 +521,8 @@ namespace ServerUTW.Migrations
 
             modelBuilder.Entity("BaseLibrary.Models.Lesson", b =>
                 {
+                    b.Navigation("Enrolllments");
+
                     b.Navigation("Teachers");
                 });
 
@@ -530,6 +531,11 @@ namespace ServerUTW.Migrations
                     b.Navigation("Lessons");
 
                     b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("BaseLibrary.Models.Student", b =>
+                {
+                    b.Navigation("Enrolllments");
                 });
 #pragma warning restore 612, 618
         }

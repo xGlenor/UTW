@@ -3,7 +3,7 @@
 
 public class Enrolllment : BaseEntity
 {
-    public int UserId { get; set; }
+    public int StudentId { get; set; }
     
     public int LessonId { get; set; }
     

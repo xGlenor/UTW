@@ -3,34 +3,74 @@
 @using BaseLibrary.Models
 @layout DashLayout
 @inject IEnrollmentRepository EnrollmentService
+@inject IStudentRepository StudentService
+@inject ILessonRepository LessonService
 @inject NotificationService NotificationService
 
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Zapis" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && enrollmentsToInsert.Any())" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Zapis" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && enrollmentsToInsert.Count() > 0)" />
 </RadzenStack>
 
-<RadzenDataGrid @ref="enrollmentsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+<RadzenDataGrid Responsive="true" @ref="enrollmentsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
                 Data="@enrollments" TItem="Enrolllment" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
         <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true" />
-        <RadzenDataGridColumn Property="UserId" Title="ID uzytkownika">
-            <EditTemplate Context="enrolllment">
-                <RadzenNumeric ShowUpDown="false" TValue="int" @bind-Value="@enrolllment.UserId" Name="UserId" Placeholder="Wprowadz ID uzytkownika" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })" />
+
+        <RadzenDataGridColumn Property="Student.FirstName" Title="Student" Width="220px">
+            <Template Context="enrollment">
+                @enrollment.Student?.FirstName @enrollment.Student?.LastName
+
+            </Template>
+            <EditTemplate Context="enrollment">
+                <RadzenDropDown @bind-Value="enrollment.StudentId" TextProperty="" Data="@students" ValueProperty="Id" Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Wybierz studenta" } })">
+                    <Template>
+                        @context.FirstName @context.LastName
+                    </Template>
+                </RadzenDropDown>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        
+        <RadzenDataGridColumn Property="Lesson.Name" Title="Zajęcia" Width="220px">
+            <Template Context="enrollment">
+                @enrollment.Lesson.Name
+
+            </Template>
+            <EditTemplate Context="enrollment">
+                <RadzenDropDown @bind-Value="enrollment.LessonId" Data="@lessons" ValueProperty="Id" Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Wybierz zajęcia" } })">
+                    <Template>
+                        @context.Name
+                    </Template>
+                </RadzenDropDown>
             </EditTemplate>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn Property="LessonId" Title="ID zajec">
+        <RadzenDataGridColumn Context="enrolllment" Filterable="false" Title="Akcja" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="10rem">
+            <Template Context="enrolllment">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(enrolllment))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(enrolllment))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
             <EditTemplate Context="enrolllment">
-                <RadzenNumeric ShowUpDown="false" TValue="int" @bind-Value="@enrolllment.LessonId" Name="LessonId" Placeholder="Wprowadz ID zajec" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })" />
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(enrolllment))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(enrolllment))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(enrolllment))" aria-label="Delete">
+                </RadzenButton>
             </EditTemplate>
         </RadzenDataGridColumn>
-
+        
     </Columns>
 </RadzenDataGrid>
 @code {
     RadzenDataGrid<Enrolllment> enrollmentsGrid;
     IEnumerable<Enrolllment> enrollments;
+    IEnumerable<Student> students;
+    IEnumerable<Lesson> lessons;
     DataGridEditMode editMode = DataGridEditMode.Single;
 
     List<Enrolllment> enrollmentsToInsert = new List<Enrolllment>();
@@ -53,6 +93,8 @@
         await base.OnInitializedAsync();
 
         enrollments = await EnrollmentService.GetAll();
+        students = await StudentService.GetAll();
+        lessons = await LessonService.GetAll();
     }
 
     async Task EditRow(Enrolllment enrollment)
@@ -71,7 +113,7 @@
         Reset(enrollment);
 
         EnrollmentService.Update(enrollment.Id, enrollment);
-        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"UserId: {enrollment.UserId} LessonId: {enrollment.LessonId}");
+        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"UserId: {enrollment.StudentId} LessonId: {enrollment.LessonId}");
     }
 
     async Task SaveRow(Enrolllment enrollment)
@@ -93,7 +135,7 @@
         {
             await EnrollmentService.Delete(enrollment.Id);
             await enrollmentsGrid.Reload();
-            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"UserId: {enrollment.UserId} LessonId: {enrollment.LessonId}");
+            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"UserId: {enrollment.StudentId} LessonId: {enrollment.LessonId}");
             await Refresh();
         }
         else
@@ -119,7 +161,7 @@
     {
         EnrollmentService.Insert(enrollment);
         enrollmentsToInsert.Remove(enrollment);
-        SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"UserId: {enrollment.UserId} LessonId: {enrollment.LessonId}");
+        SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"UserId: {enrollment.StudentId} LessonId: {enrollment.LessonId}");
     }
 
     void SendNotification(NotificationSeverity severity, string message, string detail)
@@ -132,5 +174,10 @@
         enrollments = await EnrollmentService.GetAll();
         await enrollmentsGrid.Reload();
         await InvokeAsync(StateHasChanged);
+    }
+
+    string GetUrlImage()
+    {
+        return "https://avatar.iran.liara.run/public";
     }
 }

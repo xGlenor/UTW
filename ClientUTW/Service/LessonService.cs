@@ -1,6 +1,7 @@
 ﻿using BaseLibrary.Contracts;
 using BaseLibrary.GenericModels;
 using BaseLibrary.Models;
+using BaseLibrary.Responses;
 using Blazored.LocalStorage;
 using Radzen;
 
@@ -8,7 +9,7 @@ namespace ClientUTW.Service;
 
 public class LessonService : ILessonRepository
 {
-    private const string BaseUrl = "api/Account";
+    private const string BaseUrl = "api/Lessons";
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorageService;
     private readonly NotificationService _notificationService;
@@ -25,7 +26,22 @@ public class LessonService : ILessonRepository
         string? token = await _localStorageService.GetItemAsStringAsync("token");
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        var response = await _httpClient.GetAsync("api/Lessons");
+        var response = await _httpClient.GetAsync($"{BaseUrl}");
+
+
+        if (!response.IsSuccessStatusCode)
+            return null!;
+
+        var result = await response.Content.ReadAsStringAsync();
+        return [.. Generics.DeserializeJsonStringList<Lesson>(result)];
+    }
+
+    public async Task<List<Lesson>> GetBySessionId(int sessionId)
+    {
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.GetAsync($"{BaseUrl}/GetBySessionId/{sessionId}");
 
 
         if (!response.IsSuccessStatusCode)
@@ -46,7 +62,7 @@ public class LessonService : ILessonRepository
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         var response = await _httpClient
-            .PostAsync($"api/Lessons",
+            .PostAsync($"{BaseUrl}",
                 Generics.GenerateStringContent(
                     Generics.SerializeObj(lesson)));
 
@@ -54,9 +70,23 @@ public class LessonService : ILessonRepository
         return Generics.DeserializeJsonString<Lesson>(result);
     }
 
-    public Task<Lesson> Update(int id, Lesson lesson)
+    public async Task<Lesson> Update(int id, Lesson lesson)
     {
-        throw new NotImplementedException();
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _httpClient.PutAsync($"{BaseUrl}/{id}",
+            Generics.GenerateStringContent(
+                Generics.SerializeObj(lesson)));
+
+        var readAsString = await response.Content.ReadAsStringAsync();
+        var result = Generics.DeserializeJsonString<EntityResponse>(readAsString);
+
+        if (result.flag)
+            return Generics.DeserializeJsonString<Lesson>(result.objectJson);
+        
+        return null!;
     }
 
     public async Task<Lesson> Delete(int lessonID)
@@ -64,7 +94,7 @@ public class LessonService : ILessonRepository
         string? token = await _localStorageService.GetItemAsStringAsync("token");
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        var response = await _httpClient.DeleteAsync($"api/Lessons/{lessonID}");
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{lessonID}");
 
         if (!response.IsSuccessStatusCode)
             return null!;

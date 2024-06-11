@@ -27,4 +27,10 @@
       <_ContentIncludedByDefault Remove="Pages\Dashboard\Session\ListSessions.razor" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Pages\Site\Home.razor.cs">
+        <DependentUpon>Home.razor</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>

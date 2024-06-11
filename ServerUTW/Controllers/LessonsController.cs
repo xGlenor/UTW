@@ -30,6 +30,11 @@ namespace ServerUTW.Controllers
         {
             return await _repository.GetAll();
         }
+        [HttpGet("GetBySessionId/{studentId:int}")]
+        public async Task<ActionResult<IEnumerable<Lesson>>> GetBySessionId(int studentId)
+        {
+            return await _repository.GetBySessionId(studentId);
+        }
 
         
         [HttpGet("{id}")]

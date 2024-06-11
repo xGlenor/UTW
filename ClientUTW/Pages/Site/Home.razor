@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using BaseLibrary.Models
+@using Microsoft.IdentityModel.Tokens
 
  <!-- Carousel Start -->
     <div class="container-fluid p-0 mb-5">
@@ -131,27 +133,58 @@
             </div>
             <div class="row g-3">
                 <div class="col-lg-12 col-md-6">
-                    <div class="row g-3">
-                        <table class="table table-borderless col-lg-12 col-md-12 wow zoomIn w-100" data-wow-delay="0.3s">
-                            <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">First</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                            </tr>
-                            <tr>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                            </tr>
-
-                            </tbody>
-                        </table>
-                    </div>
+                    <RadzenTabs Change="OnChange" TabPosition="TabPosition.Left" RenderMode="TabRenderMode.Client" @bind-SelectedIndex=@selectedIndex>
+                        <Tabs>
+                            @if (sessions.Count() != 0)
+                            {
+                                @foreach (Session session in sessions)
+                                {
+                                    if (session.Lessons != null)
+                                    {
+                                        var name = $"{session.SessionYear} {session.SessionType}";
+                                    
+                                        <RadzenTabsItem Text="@name">
+                                            @foreach (Lesson lesson in session.Lessons)
+                                            {
+                                                <RadzenCard Variant="Variant.Filled" Class="rz-mb-6 rz-mx-auto" >
+                                                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Start" Gap="1rem" Class="rz-p-4">
+                                                        <RadzenStack>
+                                                            <RadzenRow>
+                                                                <RadzenColumn SizeSM="6">
+                                                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Nazwa</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body1"><b>@lesson.Name</b></RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Adres</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body1"><b>@lesson.Address</b></RadzenText>
+                                                                </RadzenColumn>
+                                                                <RadzenColumn SizeSM="4">
+                                                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Data i Godzina</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body1"><b>@($"{@lesson.LessonDate:MM/dd/yyyy HH:mm}")</b></RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Sala</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body1"><b>@lesson.Classroom</b></RadzenText>
+                                                                </RadzenColumn>
+                                                                <RadzenColumn SizeSM="2">
+                                                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Liczba Miejsc</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body1"><b>@($"{@lesson.NumberOfPlaces.ToString()}")</b></RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Cena</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body1"><b>@($"{@lesson.Price}zł")</b></RadzenText>
+                                                                </RadzenColumn>
+                                                            </RadzenRow>
+                                                            <RadzenRow>
+                                                                <RadzenColumn SizeSM="12">
+                                                                    <RadzenText TextStyle="TextStyle.Overline" class="rz-display-flex rz-mt-4 rz-mb-0">Opis</RadzenText>
+                                                                    <RadzenText TextStyle="TextStyle.Body1"><b>@lesson.Description</b></RadzenText>
+                                                                </RadzenColumn>
+                                                            </RadzenRow>
+                                                        </RadzenStack>
+                                                    </RadzenStack>
+                                                </RadzenCard>
+                                            }
+                                        </RadzenTabsItem>
+                                    }
+                                }
+                            }
+                        </Tabs>
+                    </RadzenTabs>
                 </div>
             </div>
         </div>
@@ -330,3 +363,4 @@
             }
         });
     </script>
+    

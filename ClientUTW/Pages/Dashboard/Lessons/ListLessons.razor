@@ -1,25 +1,32 @@
 ﻿@page "/admin/Zajecia/Lista"
 @using BaseLibrary.Contracts
 @using BaseLibrary.Models
+@using ClientUTW.Service
 @layout DashLayout
 @inject ILessonRepository LessonService
+@inject ISessionRepository SessionService
 @inject NotificationService NotificationService
 
-
+<style>
+    .rz-grid-table {
+        width: unset;
+    }
+</style>
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
     <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Zajecia" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && lessonsToInsert.Any())" />
 </RadzenStack>
 
-<RadzenDataGrid @ref="lessonsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+<RadzenDataGrid Responsive="true" @ref="lessonsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
                 Data="@lessons" TItem="Lesson" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
+        <RadzenDataGridColumn Property="Id" Title="ID"/>
         <RadzenDataGridColumn Property="Name" Title="Nazwa">
             <EditTemplate Context="lesson">
                 <RadzenTextBox @bind-Value="lesson.Name" Style="width:200px; display: block" Name="Name" aria-label="Wpisz nazwe" />
                 <RadzenRequiredValidator Text="Nazwa jest wymagana" Component="Name" Popup="true" />
             </EditTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="Description" Title="Opis">
+        <RadzenDataGridColumn Property="Description" Title="Opis"  Width="150px">
             <EditTemplate Context="lesson">
                 <RadzenTextBox @bind-Value="lesson.Description" Style="width:200px; display: block" Name="Description" aria-label="Wpisz opis" />
                 <RadzenRequiredValidator Text="Opis jest wymagany" Component="Description" Popup="true" />
@@ -28,10 +35,10 @@
 
         <RadzenDataGridColumn Property="LessonDate" Title="Data zajec" Width="200px">
             <Template Context="lesson">
-                @String.Format("{0:d}", lesson.LessonDate)
+                @String.Format("{0:MM/dd/ss HH:mm}", lesson.LessonDate)
             </Template>
             <EditTemplate Context="lesson">
-                <RadzenDatePicker @bind-Value="lesson.LessonDate" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Wybierz datę zajec" }})" />
+                <RadzenDatePicker ShowTime="true" ShowSeconds="true" HoursStep="1.5" MinutesStep="5" SecondsStep="10" DateFormat="MM/dd/yyyy HH:mm" @bind-Value="lesson.LessonDate" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Wybierz datę zajec" }})" />
             </EditTemplate>
         </RadzenDataGridColumn>
 
@@ -41,12 +48,27 @@
             </EditTemplate>
         </RadzenDataGridColumn>
 
+        <RadzenDataGridColumn Property="Session.SessionYear" Title="Semestr" Width="220px">
+            <Template Context="lesson">
+                @lesson.Session?.SessionYear @lesson.Session?.SessionType
+
+            </Template>
+            <EditTemplate Context="lesson">
+                <RadzenDropDown @bind-Value="lesson.SessionId" Data="@sessions" ValueProperty="Id" Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Wybierz semestr" } })">
+                    <Template>
+                        @context.SessionYear @context.SessionType
+                    </Template>
+                </RadzenDropDown>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        
         <RadzenDataGridColumn Property="Address" Title="Adres">
             <EditTemplate Context="lesson">
                 <RadzenTextBox @bind-Value="lesson.Address" Style="width:200px; display: block" Name="Address" aria-label="Wpisz adres" />
             </EditTemplate>
         </RadzenDataGridColumn>
-
+        
         <RadzenDataGridColumn Property="NumberOfPlaces" Title="Liczba miejsc">
             <EditTemplate Context="lesson">
                 <RadzenNumeric ShowUpDown="false" TValue="int?" @bind-Value="@lesson.NumberOfPlaces" Name="NumberOfPlaces" Placeholder="Wprowadz liczbe miejsc" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })" />
@@ -82,6 +104,7 @@
 @code {
     RadzenDataGrid<Lesson> lessonsGrid;
     IEnumerable<Lesson> lessons;
+    IEnumerable<Session> sessions;
     DataGridEditMode editMode = DataGridEditMode.Single;
 
     List<Lesson> lessonsToInsert = new List<Lesson>();
@@ -104,6 +127,7 @@
         await base.OnInitializedAsync();
 
         lessons = await LessonService.GetAll();
+        sessions = await SessionService.GetAll();
     }
 
     async Task EditRow(Lesson lesson)

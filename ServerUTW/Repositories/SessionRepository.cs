@@ -29,7 +29,9 @@ public class SessionRepository : ISessionRepository
 
     public async Task<List<Session>> GetAll()
     {
-        return await _dbContext.Sessions.ToListAsync();
+        return await _dbContext.Sessions
+            .Include(l => l.Lessons)
+            .ToListAsync();
     }
 
     public async Task<Session?> GetById(int sessionID)

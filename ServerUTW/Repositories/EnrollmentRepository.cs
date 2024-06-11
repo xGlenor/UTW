@@ -29,7 +29,10 @@ public class EnrollmentRepository : IEnrollmentRepository
 
     public async Task<List<Enrolllment>> GetAll()
     {
-        return await _dbContext.Enrolllments.Include("Student").Include("Lesson").ToListAsync();
+        return await _dbContext.Enrolllments
+            .Include(s => s.Student)
+            .Include(l => l.Lesson)
+            .ToListAsync();
     }
 
     public async Task<Enrolllment?> GetById(int enrollmentID)
@@ -52,7 +55,7 @@ public class EnrollmentRepository : IEnrollmentRepository
         if (existingEnrollment == null)
             return null;
 
-        existingEnrollment.UserId = enrolllment.UserId;
+        existingEnrollment.StudentId = enrolllment.StudentId;
         existingEnrollment.LessonId = enrolllment.LessonId;
         existingEnrollment.Student = enrolllment.Student;
         existingEnrollment.Lesson = enrolllment.Lesson;

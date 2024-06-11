@@ -15,6 +15,11 @@ public class Lesson : BaseEntity
     public int? NumberOfPlaces { get; set; }
     
     public decimal? Price { get; set; }
+
+    public int? SessionId { get; set; }
     
+    public Session? Session { get; set; }
+    
+    public ICollection<Enrolllment>? Enrolllments { get; set; } = new List<Enrolllment>();
     public ICollection<ApplicationUser>? Teachers { get; set; } = new List<ApplicationUser>();
 }

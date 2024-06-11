@@ -8,7 +8,7 @@ namespace ClientUTW.Service;
 
 public class EnrollmentService : IEnrollmentRepository
 {
-    private const string BaseUrl = "api/Account";
+    private const string BaseUrl = "api/Enrollment";
     private readonly HttpClient _httpClient;
     private readonly ILocalStorageService _localStorageService;
     private readonly NotificationService _notificationService;
@@ -25,7 +25,7 @@ public class EnrollmentService : IEnrollmentRepository
         string? token = await _localStorageService.GetItemAsStringAsync("token");
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        var response = await _httpClient.GetAsync("api/Enrollment");
+        var response = await _httpClient.GetAsync($"{BaseUrl}");
 
 
         if (!response.IsSuccessStatusCode)
@@ -46,7 +46,7 @@ public class EnrollmentService : IEnrollmentRepository
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         var response = await _httpClient
-            .PostAsync($"api/Enrollments",
+            .PostAsync($"{BaseUrl}",
                 Generics.GenerateStringContent(
                     Generics.SerializeObj(enrollment)));
 
@@ -64,7 +64,7 @@ public class EnrollmentService : IEnrollmentRepository
         string? token = await _localStorageService.GetItemAsStringAsync("token");
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        var response = await _httpClient.DeleteAsync($"api/Enrollments/{enrollmentID}");
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{enrollmentID}");
 
         if (!response.IsSuccessStatusCode)
             return null!;

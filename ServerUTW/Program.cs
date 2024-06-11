@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using BaseLibrary.Contracts;
 using BaseLibrary.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,7 +21,12 @@ var builder = WebApplication.CreateBuilder(args);
 |--------------------------------------------------------------------------
 */
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 

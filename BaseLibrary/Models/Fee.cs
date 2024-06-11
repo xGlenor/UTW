@@ -12,6 +12,6 @@ public class Fee : BaseEntity
     
     public bool? isPaid { get; set; }
     
-    public Student Student { get; set; }
+    public Student? Student { get; set; }
     
 }

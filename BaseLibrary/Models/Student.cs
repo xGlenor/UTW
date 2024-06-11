@@ -8,4 +8,6 @@ public class Student : BaseEntity
     public string Address { get; set; }
     
     public DateOnly Birthdate { get; set; }
+
+    public ICollection<Enrolllment>? Enrolllments { get; set; } = new List<Enrolllment>();
 }

@@ -30,7 +30,17 @@ public class LessonRepository : ILessonRepository
 
     public async Task<List<Lesson>> GetAll()
     {
-        return await _dbContext.Lessons.ToListAsync();
+        return await _dbContext.Lessons
+            .Include(e => e.Enrolllments)
+            .Include(s => s.Session)
+            .ToListAsync();
+    }
+
+    public async Task<List<Lesson>> GetBySessionId(int sessionId)
+    {
+        return await _dbContext.Lessons
+            .Where(s => s.SessionId.Equals(sessionId))
+            .ToListAsync();
     }
 
     public async Task<Lesson?> GetById(int lessonID)
@@ -60,6 +70,7 @@ public class LessonRepository : ILessonRepository
         existingLesson.NumberOfPlaces = lesson.NumberOfPlaces;
         existingLesson.Price = lesson.Price;
         existingLesson.Teachers = lesson.Teachers;
+        existingLesson.SessionId = lesson.SessionId;
 
         await _dbContext.SaveChangesAsync();
         return existingLesson;
