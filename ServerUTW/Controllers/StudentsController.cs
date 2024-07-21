@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using BaseLibrary.Contracts;
+using BaseLibrary.DTOs;
 using BaseLibrary.GenericModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +19,12 @@ namespace ServerUTW.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IStudentRepository _repository;
+        private readonly IMapper _mapper;
 
-        public StudentsController(IStudentRepository context)
+        public StudentsController(IStudentRepository context, IMapper mapper)
         {
             _repository = context;
+            _mapper = mapper;
         }
 
         // GET: api/Students
@@ -47,21 +51,18 @@ namespace ServerUTW.Controllers
         // POST: api/Students
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Student>> PostStudent(Student student)
+        public async Task<ActionResult<Student>> PostStudent(StudentDTO studentDto)
         {
+            var student = _mapper.Map<Student>(studentDto);
             var studentAdded = await _repository.Insert(student);
 
-            return CreatedAtAction("GetStudent", new { id = student.Id }, student);
+            return Ok(studentAdded);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<EntityResponse> PutStudent(int id, Student student)
+        public async Task<EntityResponse> PutStudent(int id, StudentDTO studentDto)
         {
-            if (id != student.Id)
-            {
-                return new EntityResponse(false, "Bad ID", null);
-            }
-
+            var student = _mapper.Map<Student>(studentDto);
             var result = await _repository.Update(id, student);
 
             return new EntityResponse(true, "Updated successfully", Generics.SerializeObj(result));

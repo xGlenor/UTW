@@ -1,5 +1,6 @@
 ﻿@page "/admin/Zapisy/Lista"
 @using BaseLibrary.Contracts
+@using BaseLibrary.GenericModels
 @using BaseLibrary.Models
 @layout DashLayout
 @inject IEnrollmentRepository EnrollmentService
@@ -108,11 +109,12 @@
         await enrollmentsGrid.EditRow(enrollment);
     }
 
-    void OnUpdateRow(Enrolllment enrollment)
+    async void OnUpdateRow(Enrolllment enrollment)
     {
         Reset(enrollment);
-
+        
         EnrollmentService.Update(enrollment.Id, enrollment);
+        await Refresh();
         SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"UserId: {enrollment.StudentId} LessonId: {enrollment.LessonId}");
     }
 
@@ -153,14 +155,20 @@
         }
 
         var enrollment = new Enrolllment();
-        enrollmentsToInsert.Add(enrollment);
         await enrollmentsGrid.InsertRow(enrollment);
+        enrollment.Lesson = new Lesson();
+        enrollment.Student = new Student();
+        enrollmentsToInsert.Add(enrollment);
+        
     }
 
-    void OnCreateRow(Enrolllment enrollment)
+    async void OnCreateRow(Enrolllment enrollment)
     {
-        EnrollmentService.Insert(enrollment);
+        enrollment.Student = await StudentService.GetById(enrollment.StudentId);
+        enrollment.Lesson = await LessonService.GetById(enrollment.LessonId);
+        await EnrollmentService.Insert(enrollment);
         enrollmentsToInsert.Remove(enrollment);
+        await Refresh();
         SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"UserId: {enrollment.StudentId} LessonId: {enrollment.LessonId}");
     }
 
@@ -175,9 +183,5 @@
         await enrollmentsGrid.Reload();
         await InvokeAsync(StateHasChanged);
     }
-
-    string GetUrlImage()
-    {
-        return "https://avatar.iran.liara.run/public";
-    }
+    
 }

@@ -35,9 +35,18 @@ public class StudentService : IStudentRepository
         return [.. Generics.DeserializeJsonStringList<Student>(result)];
     }
 
-    public Task<Student?> GetById(int studentID)
+    public async Task<Student?> GetById(int studentID)
     {
-        throw new NotImplementedException();
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.GetAsync($"{BaseUrl}/{studentID}");
+        
+        if (!response.IsSuccessStatusCode)
+            return null!;
+        
+        var result = await response.Content.ReadAsStringAsync();
+        return Generics.DeserializeJsonString<Student>(result);
     }
 
     public async Task<Student> Insert(Student student)

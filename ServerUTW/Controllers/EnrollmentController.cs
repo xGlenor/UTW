@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BaseLibrary.Models;
 using ServerUTW.Data;
 using BaseLibrary.Contracts;
+using BaseLibrary.DTOs;
 using BaseLibrary.GenericModels;
 using BaseLibrary.Responses;
 
@@ -18,10 +20,16 @@ namespace ServerUTW.Controllers
     public class EnrollmentController : ControllerBase
     {
         private readonly IEnrollmentRepository _repository;
+        private readonly ILessonRepository _lesson;
+        private readonly IStudentRepository _student;
+        private readonly IMapper _mapper;
 
-        public EnrollmentController(IEnrollmentRepository context)
+        public EnrollmentController(IEnrollmentRepository context, IMapper mapper, ILessonRepository lesson, IStudentRepository student)
         {
             _repository = context;
+            _mapper = mapper;
+            _lesson = lesson;
+            _student = student;
         }
         
         [HttpGet]
@@ -44,25 +52,26 @@ namespace ServerUTW.Controllers
         }
         
         [HttpPut("{id:int}")]
-        public async Task<EntityResponse> PutStudent(int id, Enrolllment enrolllment)
+        public async Task<ActionResult<Enrolllment>> PutStudent(int id, EnrollmentDTO enrollmentDto)
         {
-            if (id != enrolllment.Id)
-            {
-                return new EntityResponse(false, "Bad ID", null);
-            }
-
+            var enrolllment = _mapper.Map<Enrolllment>(enrollmentDto);
+            enrolllment.Student = await _student.GetById(enrolllment.StudentId);
+            enrolllment.Lesson = await _lesson.GetById(enrolllment.LessonId);
             var result = await _repository.Update(id, enrolllment);
 
-            return new EntityResponse(true, "Updated successfully", Generics.SerializeObj(result));
+            return Ok(result);
         }
         
 
         [HttpPost]
-        public async Task<ActionResult<Enrolllment>> PostEnrolllment(Enrolllment enrolllment)
-        {
-           var enrollmentAdded = await _repository.Insert(enrolllment);
+        public async Task<ActionResult<Enrolllment>> PostEnrolllment(EnrollmentDTO enrolllmentDto)
+        { 
+            var enrolllment = _mapper.Map<Enrolllment>(enrolllmentDto);
+            enrolllment.Student = await _student.GetById(enrolllment.StudentId);
+            enrolllment.Lesson = await _lesson.GetById(enrolllment.LessonId);
+            var enrollmentAdded = await _repository.Insert(enrolllment);
 
-            return CreatedAtAction("GetEnrolllment", new { id = enrolllment.Id }, enrolllment);
+            return Ok();
         }
         
         [HttpDelete("{id}")]

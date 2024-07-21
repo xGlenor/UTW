@@ -51,9 +51,18 @@ public class LessonService : ILessonRepository
         return [.. Generics.DeserializeJsonStringList<Lesson>(result)];
     }
 
-    public Task<Lesson?> GetById(int lessonID)
+    public async Task<Lesson?> GetById(int lessonID)
     {
-        throw new NotImplementedException();
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.GetAsync($"{BaseUrl}/{lessonID}");
+        
+        if (!response.IsSuccessStatusCode)
+            return null!;
+        
+        var result = await response.Content.ReadAsStringAsync();
+        return Generics.DeserializeJsonString<Lesson>(result);
     }
 
     public async Task<Lesson> Insert(Lesson lesson)
