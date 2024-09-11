@@ -1,0 +1,89 @@
+@page "/Rejestracja"
+@using BaseLibrary.Contracts
+@using BaseLibrary.Models
+@inject NavigationManager NavManager
+@inject IStudentRepository StudentService
+
+
+<section class="p-3 p-md-4 p-xl-5">
+    <div class="container">
+        <div class="card border-light-subtle shadow-sm">
+            <div class="row g-0">
+                <div class="col-12 col-md-6 text-bg-primary ">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="col-10 col-xl-8">
+                            <img class="img-fluid rounded mb-4" loading="lazy" src="img/register.png">
+                            @*<hr class="border-primary-subtle mb-4">
+                            <h2 class="h1 mb-4">We make digital products that drive you to stand out.</h2>
+                            <p class="lead m-0">We write words, take photos, make videos, and interact with artificial intelligence.</p>*@
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card-body p-3 p-md-4 p-xl-5">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-5">
+                                    <h2 class="h3">Zapisz się już teraz</h2>
+                                    <h3 class="fs-6 fw-normal text-secondary m-0">Wypełnij poniższy formularz</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <EditForm action="#!" Enhance Model="Student" OnValidSubmit="HandleLogin">
+                            <DataAnnotationsValidator/>
+                            <ValidationSummary/>
+                            <div class="row gy-3 gy-md-4 overflow-hidden">
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                    <input @bind="Student.Email" type="email" class="form-control" name="email" id="email" placeholder="j.kowalski@gmail.com" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="firstName" class="form-label">Imię <span class="text-danger">*</span></label>
+                                    <input @bind="Student.FirstName" type="text" class="form-control" name="firstName" id="firstName" placeholder="Imię" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="lastName" class="form-label">Nazwisko <span class="text-danger">*</span></label>
+                                    <input @bind="Student.LastName" type="text" class="form-control" name="lastName" id="lastName" placeholder="Nazwisko" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="lastName" class="form-label">Telefon <span class="text-danger">*</span></label>
+                                    <input @bind="Student.Telephone" type="text" class="form-control" name="lastName" id="lastName" placeholder="Telefon" required>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input @bind="isClicked" class="form-check-input" type="checkbox" value="" name="iAgree" id="iAgree" required>
+                                        <label class="form-check-label text-secondary" for="iAgree">
+                                            Wyrażam zgodę na przetwarzanie moich danych osobowych, zgodnie z art. 13 ogólnego rozporządzenia o ochronie danych
+                                            osobowych z dnia 27 kwietnia 2016 r. (Dz. Urz. UE L 119 z 04.05.2016) na potrzeby związane z realizacja tego kontaktu (Klauzula informacyjna).
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-grid">
+                                        <button class="btn bsb-btn-xl btn-primary" type="submit">Zapisz się!</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@code {
+
+    public Student Student { get; set; } = new();
+    public bool isClicked { get; set; } = false;
+
+    private async void HandleLogin(EditContext obj)
+    {
+        Student.IsEnrolled = false;
+        var addeddStudent = await StudentService.Insert(Student);
+        NavManager.NavigateTo($"/Rejestracja_Zakonczona/{addeddStudent.Id}", forceLoad: true);
+    }
+
+
+}

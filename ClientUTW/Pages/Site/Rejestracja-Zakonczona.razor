@@ -1,0 +1,62 @@
+@using BaseLibrary.Contracts
+@using BaseLibrary.Models
+@inject IStudentRepository StudentService
+
+@page "/Rejestracja_Zakonczona/{Id:int}"
+
+
+<section class="p-3 p-md-4 p-xl-5 p-7">
+    <div class="container">
+        <div class="card border-light-subtle shadow-sm">
+            <div class="row g-0">
+                <div class="col-12 col-md-6 text-bg-primary ">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <div class="col-10 col-xl-8">
+                            <img class="img-fluid rounded mb-4" loading="lazy" src="img/register.png">
+                            <hr class="border-primary-subtle mb-4">
+                            <h2 class="h1 mb-4">Dziękujemy za zapis!</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="card-body p-3 p-md-4 p-xl-5">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-5">
+                                    <h2 class="h3">Cześć @Student?.FirstName!</h2>
+                                    <p class="fs-6 fw-normal text-secondary m-0">
+                                        Twoje zgłoszenie zostało do nas wysłane!
+                                        <br/>
+                                        Pamiętaj, że jest to tylko <b>zgłoszenie chęci uczestnictwa</b> w tym semestrze.
+                                    </p>
+                                    <br/>
+                                    <p class="fs-6 fw-normal text-secondary m-0">
+                                        Po otrzymaniu zgłoszenia skontaktujemy się telefonicznie lub mailowo w celu umówienia się na spotkanie i dopełnienia pozostałych formalności.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    [Parameter] public int? Id { get; set; } = 0;
+
+    private Student? Student { get; set; }
+
+    protected override async void OnParametersSet()
+    {
+        Id = Id ?? 0;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Student = await StudentService.GetById(Id ?? 0);
+    }
+
+
+}
