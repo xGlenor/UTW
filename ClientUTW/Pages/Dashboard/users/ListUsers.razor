@@ -1,0 +1,200 @@
+﻿@page "/admin/Uzytkownicy/Lista"
+@using BaseLibrary.Contracts
+@using BaseLibrary.DTOs
+@using BaseLibrary.Models
+@using Microsoft.AspNetCore.Authorization
+@inject DialogService DialogService
+@layout DashLayout
+@inject IUserRepository UserService
+@inject NotificationService NotificationService
+@inject IAccountCodeRepository AccountService
+@attribute [Authorize(Roles = "Admin")]
+
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
+    <RadzenButton Text="Dodaj użytkownika" Icon="add_circle_outline" ButtonStyle="ButtonStyle.Secondary" Click=@ShowInlineDialog/>
+</RadzenStack>
+
+<RadzenDataGrid @ref="usersGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+                Data="@users" TItem="ApplicationUserDTO" RowUpdate="@OnUpdateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
+    <Columns>
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true"/>
+        <RadzenDataGridColumn Property="FirstName" Title="Imię">
+            <EditTemplate Context="userDto">
+                <RadzenTextBox @bind-Value="userDto.FirstName" Style="width:200px; display: block" Name="FirstName" aria-label="Wpisz Imię"/>
+                <RadzenRequiredValidator Text="Imię jest wymagane" Component="FirstName" Popup="true"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="LastName" Title="Nazwisko">
+            <EditTemplate Context="userDto">
+                <RadzenTextBox @bind-Value="userDto.LastName" Style="width:200px; display: block" Name="LastName" aria-label="Wpisz Nazwisko"/>
+                <RadzenRequiredValidator Text="Nazwisko jest wymagane" Component="LastName" Popup="true"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Email" Title="Email">
+            <EditTemplate Context="userDto">
+                <RadzenTextBox @bind-Value="userDto.Email" Style="width:200px; display: block" Name="Email" aria-label="Wpisz Nazwisko"/>
+                <RadzenRequiredValidator Text="Email jest wymagany" Component="Email" Popup="true"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Address" Title="Adres">
+            <EditTemplate Context="userDto">
+                <RadzenTextBox @bind-Value="userDto.Address" Style="width:200px; display: block" Name="Address" aria-label="Uzupełnij Adres"/>
+                <RadzenRequiredValidator Text="Adres jest wymagany" Component="Address" Popup="true"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Birthdate" Title="Data Urodzenia" Width="200px">
+            <Template Context="userDto">
+                @String.Format("{0:d}", userDto.Birthdate)
+            </Template>
+            <EditTemplate Context="userDto">
+                <RadzenDatePicker @bind-Value="userDto.Birthdate" Style="width:100%" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Wybierz datę urodzenia" } })"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Skills" Title="Umiejętności">
+            <EditTemplate Context="userDto">
+                <RadzenTextBox @bind-Value="userDto.Skills" Style="width:200px; display: block" Name="Code" aria-label="Uzupełnij umiejętności"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="userDto" Filterable="false" Title="Akcja" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="10rem">
+            <Template Context="userDto">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(userDto))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(userDto))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="userDto">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(userDto))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(userDto))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(userDto))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+<div class="rz-p-12 rz-text-align-center">
+
+</div>
+
+
+@code {
+    RadzenDataGrid<ApplicationUserDTO> usersGrid;
+    IEnumerable<ApplicationUserDTO> users;
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<ApplicationUserDTO> usersToInsert = new List<ApplicationUserDTO>();
+    List<ApplicationUserDTO> usersToUpdate = new List<ApplicationUserDTO>();
+    AccountCode code = new();
+
+    async Task ShowInlineDialog()
+    {
+        var result = await DialogService.OpenAsync("Dodaj nowego Użytkownika", ds =>
+            @<RadzenStack Gap="1.5rem">
+                <EditForm Enhance Model="typeof(AccountCode)" OnValidSubmit="HandleAccountCode">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input @bind="code.Email" class="form-control form-control-lg" type="email" name="email" placeholder="Podaj Email"/>
+                    </div>
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-lg btn-primary" type="submit">Dodaj</button>
+                    </div>
+                </EditForm>
+            </RadzenStack>);
+    }
+
+    async Task HandleAccountCode()
+    {
+        var test = await AccountService.CreateCode(code);
+
+        await DialogService.Alert(
+            $"Gratulacje stworzono konto dla <b>{test.Email}</b> \nJego kod, który musisz mu podać to: \n <b>{code.Code}</b>",
+            "Dodano użytkownika", new AlertOptions() { OkButtonText = "Zamknij" });
+    }
+
+    void Reset()
+    {
+        usersToInsert.Clear();
+        usersToUpdate.Clear();
+    }
+
+    void Reset(ApplicationUserDTO userDto)
+    {
+        usersToInsert.Remove(userDto);
+        usersToUpdate.Remove(userDto);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        users = await UserService.GetAllUsers();
+    }
+
+    async Task EditRow(ApplicationUserDTO userDto)
+    {
+        if (editMode == DataGridEditMode.Single && usersToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        usersToUpdate.Add(userDto);
+        await usersGrid.EditRow(userDto);
+    }
+
+    void OnUpdateRow(ApplicationUserDTO userDto)
+    {
+        Reset(userDto);
+
+        UserService.Update(userDto);
+        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"{userDto.FirstName} {userDto.LastName}");
+    }
+
+    async Task SaveRow(ApplicationUserDTO userDto)
+    {
+        await usersGrid.UpdateRow(userDto);
+    }
+
+    void CancelEdit(ApplicationUserDTO userDto)
+    {
+        Reset(userDto);
+
+        usersGrid.CancelEditRow(userDto);
+    }
+
+    async Task DeleteRow(ApplicationUserDTO userDto)
+    {
+        Reset(userDto);
+
+        if (users.Contains(userDto))
+        {
+            await UserService.Delete(userDto.Id);
+            await usersGrid.Reload();
+            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"{userDto.FirstName} {userDto.LastName}");
+            await Refresh();
+        }
+        else
+        {
+            usersGrid.CancelEditRow(userDto);
+            await usersGrid.Reload();
+        }
+    }
+
+
+    void SendNotification(NotificationSeverity severity, string message, string detail)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = message, Detail = detail, CloseOnClick = true, Payload = DateTime.Now });
+    }
+
+    private async Task Refresh()
+    {
+        users = await UserService.GetAllUsers();
+        await usersGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
+
+}
