@@ -1,0 +1,195 @@
+@page "/admin/Zapisy/Nauczyciele"
+@using BaseLibrary.Contracts
+@using BaseLibrary.DTOs
+@using BaseLibrary.Models
+@using ClientUTW.Service
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@layout DashLayout
+@inject IEnrollmentRepository EnrollmentService
+@inject ILessonRepository LessonService
+@inject IUserRepository UserService
+@inject NotificationService NotificationService
+@attribute [Authorize(Roles = "Admin")]
+
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Zapis" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && enrollmentsToInsert.Count() > 0)"/>
+</RadzenStack>
+
+<RadzenDataGrid Responsive="true" @ref="enrollmentsGrid" AllowAlternatingRows="false" FilterMode="FilterMode.Simple" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+                Data="@enrollments" TItem="TeacherEnrollment" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
+    <Columns>
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true"/>
+
+        <RadzenDataGridColumn Property="Teacher.FirstName" Title="Teacher" Width="220px">
+            <Template Context="enrollment">
+                @enrollment.Teacher?.FirstName @enrollment.Teacher?.LastName
+
+            </Template>
+            <EditTemplate Context="enrollment">
+                <RadzenDropDown @bind-Value="enrollment.TeacherId" TextProperty="" Data="@teachers" ValueProperty="Id" Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Wybierz nauczyciela" } })">
+                    <Template>
+                        @context.FirstName @context.LastName
+                    </Template>
+                </RadzenDropDown>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="Lesson.Name" Title="Zajęcia" Width="220px">
+            <Template Context="enrollment">
+                @enrollment.Lesson.Name
+
+            </Template>
+            <EditTemplate Context="enrollment">
+                <RadzenDropDown @bind-Value="enrollment.LessonId" Data="@lessons" ValueProperty="Id" Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Wybierz zajęcia" } })">
+                    <Template>
+                        @context.Name
+                    </Template>
+                </RadzenDropDown>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="Lesson.Session.SessionType" Title="Semestr" Width="220px"/>
+
+        <RadzenDataGridColumn Property="Lesson.Session.SessionYear" Title="Rok Akademicki" Width="220px"/>
+
+        <RadzenDataGridColumn Context="enrolllment" Filterable="false" Title="Akcja" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="10rem">
+            <Template Context="enrolllment">
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => EditRow(enrolllment))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(enrolllment))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+            <EditTemplate Context="enrolllment">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveRow(enrolllment))" aria-label="Save">
+                </RadzenButton>
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@((args) => CancelEdit(enrolllment))" aria-label="Cancel">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" class="my-1 ms-1" Click="@(args => DeleteRow(enrolllment))" aria-label="Delete">
+                </RadzenButton>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    RadzenDataGrid<TeacherEnrollment> enrollmentsGrid;
+    IEnumerable<TeacherEnrollment> enrollments;
+    IEnumerable<ApplicationUserDTO> teachers;
+    IEnumerable<Lesson> lessons;
+    DataGridEditMode editMode = DataGridEditMode.Single;
+
+    List<TeacherEnrollment> enrollmentsToInsert = new List<TeacherEnrollment>();
+    List<TeacherEnrollment> enrollmentsToUpdate = new List<TeacherEnrollment>();
+
+    void Reset()
+    {
+        enrollmentsToInsert.Clear();
+        enrollmentsToUpdate.Clear();
+    }
+
+    void Reset(TeacherEnrollment enrollment)
+    {
+        enrollmentsToInsert.Remove(enrollment);
+        enrollmentsToUpdate.Remove(enrollment);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        enrollments = await EnrollmentService.GetAllTeachers();
+        teachers = await UserService.GetAllUsers();
+        lessons = await LessonService.GetAll();
+    }
+
+    async Task EditRow(TeacherEnrollment enrollment)
+    {
+        if (editMode == DataGridEditMode.Single && enrollmentsToInsert.Count() > 0)
+        {
+            Reset();
+        }
+
+        enrollmentsToUpdate.Add(enrollment);
+        await enrollmentsGrid.EditRow(enrollment);
+    }
+
+    async void OnUpdateRow(TeacherEnrollment enrollment)
+    {
+        Reset(enrollment);
+
+        await EnrollmentService.UpdateTeacher(enrollment.Id, enrollment);
+        await Refresh();
+        SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"UserId: {enrollment.TeacherId} LessonId: {enrollment.LessonId}");
+    }
+
+    async Task SaveRow(TeacherEnrollment enrollment)
+    {
+        await enrollmentsGrid.UpdateRow(enrollment);
+    }
+
+    void CancelEdit(TeacherEnrollment enrollment)
+    {
+        Reset(enrollment);
+        enrollmentsGrid.CancelEditRow(enrollment);
+    }
+
+    async Task DeleteRow(TeacherEnrollment enrollment)
+    {
+        Reset(enrollment);
+
+        if (enrollments.Contains(enrollment))
+        {
+            await EnrollmentService.DeleteTeacher(enrollment.Id);
+            await enrollmentsGrid.Reload();
+            SendNotification(NotificationSeverity.Error, "Pomyślnie usunięto", $"UserId: {enrollment.TeacherId} LessonId: {enrollment.LessonId}");
+            await Refresh();
+        }
+        else
+        {
+            enrollmentsGrid.CancelEditRow(enrollment);
+            await enrollmentsGrid.Reload();
+        }
+    }
+
+    async Task InsertRow()
+    {
+        if (editMode == DataGridEditMode.Single)
+        {
+            Reset();
+        }
+
+        var enrollment = new TeacherEnrollment();
+        await enrollmentsGrid.InsertRow(enrollment);
+        enrollment.Lesson = new Lesson();
+        enrollment.Teacher = new ApplicationUser();
+        enrollmentsToInsert.Add(enrollment);
+    }
+
+    async void OnCreateRow(TeacherEnrollment enrollment)
+    {
+        enrollment.Teacher = await UserService.GetUserById(enrollment.TeacherId);
+        enrollment.Lesson = await LessonService.GetById(enrollment.LessonId);
+        await EnrollmentService.InsertTeacher(enrollment);
+        enrollmentsToInsert.Remove(enrollment);
+        await Refresh();
+        SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"UserId: {enrollment.TeacherId} LessonId: {enrollment.LessonId}");
+    }
+
+    void SendNotification(NotificationSeverity severity, string message, string detail)
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = message, Detail = detail, CloseOnClick = true, Payload = DateTime.Now });
+    }
+
+    private async Task Refresh()
+    {
+        enrollments = await EnrollmentService.GetAllTeachers();
+        await enrollmentsGrid.Reload();
+        await InvokeAsync(StateHasChanged);
+    }
+
+}
