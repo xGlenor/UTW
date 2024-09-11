@@ -1,0 +1,97 @@
+@page "/admin/Zajecia/MojeZajecia"
+@layout DashLayout
+@using BaseLibrary.Contracts
+@using BaseLibrary.Models
+@using ClientUTW.Auth
+@using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+@attribute [Authorize(Roles = "Admin, Teacher")]
+
+@inject IEnrollmentRepository EnrollmentService
+@inject ILessonRepository LessonService
+
+<RadzenStack Gap="1rem">
+    <RadzenCard Variant="Variant.Outlined">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem;" Wrap="FlexWrap.Wrap">
+            <RadzenLabel Text="Wybierz Zajęcia:" Component="DropDown1"/>
+            @if (enrollmentsTeacher != null && enrollmentsTeacher.Any())
+            {
+                <RadzenDropDown @bind-Value="@lessonId" Name="DropDown1"
+                                TextProperty="Lesson.Name"
+                                ValueProperty="Lesson.Id"
+                                Data="@enrollmentsTeacher"
+                                Change="Change"/>
+                <RadzenButton Click=@(args => Change()) Text="Pokaż" ButtonStyle="ButtonStyle.Primary"/>
+            }
+        </RadzenStack>
+    </RadzenCard>
+
+    @if (_lesson != null)
+    {
+        <RadzenCard Variant="Variant.Outlined">
+            <RadzenText TextStyle="TextStyle.Body1">
+                <strong>Zajęcia: </strong>@_lesson.Name
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                <strong>Data: </strong>@_lesson.LessonDate
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                <strong>Adres: </strong>@_lesson.Address
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                <strong>Klasa: </strong>@_lesson.Classroom
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                <strong>Ilośc miejsc: </strong>@_lesson.NumberOfPlaces
+            </RadzenText>
+
+        </RadzenCard>
+    }
+
+
+    <RadzenDataGrid Data="@enrollments" AllowPaging="true" AllowSorting="true">
+        <Columns>
+            <RadzenDataGridColumn Property="Student.FirstName" Title="Student">
+                <Template Context="detail">
+                    @detail.Student.FirstName @detail.Student.LastName
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="Student.Email" Title="Email"/>
+            <RadzenDataGridColumn Property="Student.Telephone" Title="Nr. Telefonu"/>
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenStack>
+
+
+@code {
+    AuthenticationState? _authState;
+    IEnumerable<TeacherEnrollment> enrollmentsTeacher;
+    IEnumerable<Enrolllment> enrollments;
+
+    Lesson? _lesson { get; set; }
+    int lessonId;
+    string? _userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var ctm = (AuthStateProvider)AuthStateProvider;
+        _userId = await ctm.GetId();
+
+        enrollmentsTeacher = await EnrollmentService.GetTeacherEnrollmentsById(_userId);
+    }
+
+    private async void Change()
+    {
+        enrollments = await EnrollmentService.GetStudentbyLessonId(lessonId);
+        _lesson = await LessonService.GetById(lessonId);
+    }
+
+    private void OnChange(ChangeEventArgs args)
+    {
+        lessonId = (int)args.Value;
+        Change();
+    }
+
+}
