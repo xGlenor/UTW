@@ -1,0 +1,16 @@
+﻿services:
+  serverutw:
+    image: serverutw
+    build:
+      context: .
+      dockerfile: ServerUTW/Dockerfile
+    ports:
+      - '7217:8080'
+
+  clientutw:
+    image: clientutw
+    build:
+      context: .
+      dockerfile: ClientUTW/Dockerfile
+    ports:
+      - '8080:80'
