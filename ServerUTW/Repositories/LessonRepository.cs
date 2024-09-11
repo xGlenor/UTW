@@ -57,10 +57,10 @@ public class LessonRepository : ILessonRepository
 
     public async Task<Lesson> Update(int id, Lesson lesson)
     {
-        var existingLesson = await _dbContext.Lessons.FirstOrDefaultAsync(lesson => lesson.Id.Equals(id));
+        var existingLesson = await _dbContext.Lessons.FirstOrDefaultAsync(lesson1 => lesson1.Id.Equals(id));
 
         if (existingLesson == null)
-            return null;
+            return null!;
 
         existingLesson.Name = lesson.Name;
         existingLesson.Description = lesson.Description;

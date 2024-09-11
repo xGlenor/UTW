@@ -2,19 +2,22 @@
 @using BaseLibrary.Contracts
 @using BaseLibrary.enums
 @using BaseLibrary.Models
+@using Microsoft.AspNetCore.Authorization
+@using ClientUTW.Auth
 @layout DashLayout
 @inject ISessionRepository SessionService
 @inject NotificationService NotificationService
+@attribute [Authorize(Roles = "Admin")]
 
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Semestr" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && sesssionsToInsert.Any())" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Semestr" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && sesssionsToInsert.Any())"/>
 </RadzenStack>
 
 <RadzenDataGrid @ref="sessionsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
                 Data="@sesssions" TItem="Session" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
-        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true" />
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true"/>
         <RadzenDataGridColumn Property="SessionYear" Title="Rok">
             <EditTemplate Context="session">
                 <RadzenNumeric ShowUpDown="false" TValue="int" @bind-Value="@session.SessionYear" Name="SessionYear" Placeholder="Wprowadz rok" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "enter value" } })"/>
@@ -152,4 +155,5 @@
         await sessionsGrid.Reload();
         await InvokeAsync(StateHasChanged);
     }
+
 }

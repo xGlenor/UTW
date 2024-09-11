@@ -14,7 +14,8 @@ public class LessonService : ILessonRepository
     private readonly ILocalStorageService _localStorageService;
     private readonly NotificationService _notificationService;
 
-    public LessonService(HttpClient httpClient, ILocalStorageService localStorageService, NotificationService notificationService)
+    public LessonService(HttpClient httpClient, ILocalStorageService localStorageService,
+        NotificationService notificationService)
     {
         this._httpClient = httpClient;
         this._localStorageService = localStorageService;
@@ -57,10 +58,10 @@ public class LessonService : ILessonRepository
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         var response = await _httpClient.GetAsync($"{BaseUrl}/{lessonID}");
-        
+
         if (!response.IsSuccessStatusCode)
             return null!;
-        
+
         var result = await response.Content.ReadAsStringAsync();
         return Generics.DeserializeJsonString<Lesson>(result);
     }
@@ -94,7 +95,7 @@ public class LessonService : ILessonRepository
 
         if (result.flag)
             return Generics.DeserializeJsonString<Lesson>(result.objectJson);
-        
+
         return null!;
     }
 

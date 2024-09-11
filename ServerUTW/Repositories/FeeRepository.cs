@@ -29,7 +29,8 @@ public class FeeRepository : IFeeRepository
 
     public async Task<List<Fee>> GetAll()
     {
-        return await _dbContext.Fees.ToListAsync();
+        return await _dbContext.Fees
+            .Include(f => f.Student).ToListAsync();
     }
 
     public async Task<Fee?> GetById(int feeID)

@@ -27,6 +27,11 @@ public class SessionRepository : ISessionRepository
         return session;
     }
 
+    public Task<Session> GetCurrentSemester(DateTime currentDate)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<List<Session>> GetAll()
     {
         return await _dbContext.Sessions

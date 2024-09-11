@@ -1,35 +1,49 @@
-﻿@page "/admin/Studenci/Lista"
+﻿@page "/admin/Studenci/Zapisani"
 @using BaseLibrary.Contracts
 @using BaseLibrary.Models
+@using Microsoft.AspNetCore.Authorization
 @layout DashLayout
 @inject IStudentRepository StudentService
 @inject NotificationService NotificationService
+@attribute [Authorize(Roles = "Admin")]
 
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Studenta" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && studentsToInsert.Count() > 0)" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Studenta" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && studentsToInsert.Count() > 0)"/>
 </RadzenStack>
 
 <RadzenDataGrid @ref="studentsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
                 Data="@students" TItem="Student" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
-        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true" />
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true"/>
         <RadzenDataGridColumn Property="FirstName" Title="Imię">
             <EditTemplate Context="student">
-                <RadzenTextBox @bind-Value="student.FirstName" Style="width:200px; display: block" Name="FirstName" aria-label="Wpisz Imię" />
-                <RadzenRequiredValidator Text="Imię jest wymagane" Component="FirstName" Popup="true" />
+                <RadzenTextBox @bind-Value="student.FirstName" Style="width:200px; display: block" Name="FirstName" aria-label="Wpisz Imię"/>
+                <RadzenRequiredValidator Text="Imię jest wymagane" Component="FirstName" Popup="true"/>
             </EditTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="LastName" Title="Nazwisko">
             <EditTemplate Context="student">
-                <RadzenTextBox @bind-Value="student.LastName" Style="width:200px; display: block" Name="LastName" aria-label="Wpisz Nazwisko" />
-                <RadzenRequiredValidator Text="Nazwisko jest wymagane" Component="LastName" Popup="true" />
+                <RadzenTextBox @bind-Value="student.LastName" Style="width:200px; display: block" Name="LastName" aria-label="Wpisz Nazwisko"/>
+                <RadzenRequiredValidator Text="Nazwisko jest wymagane" Component="LastName" Popup="true"/>
             </EditTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="Address" Title="Adres">
             <EditTemplate Context="student">
-                <RadzenTextBox @bind-Value="student.Address" Style="width:200px; display: block" Name="Address" aria-label="Uzupełnij Adres" />
-                <RadzenRequiredValidator Text="Adres jest wymagany" Component="Address" Popup="true" />
+                <RadzenTextBox @bind-Value="student.Address" Style="width:200px; display: block" Name="Address" aria-label="Uzupełnij Adres"/>
+                <RadzenRequiredValidator Text="Adres jest wymagany" Component="Address" Popup="true"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Telephone" Title="Telefon">
+            <EditTemplate Context="student">
+                <RadzenTextBox @bind-Value="student.Telephone" Style="width:200px; display: block" Name="Telephone" aria-label="Uzupełnij Nr. telefonu"/>
+                <RadzenRequiredValidator Text="Nr. telefonu jest wymagany" Component="Telephone" Popup="true"/>
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Email" Title="Email">
+            <EditTemplate Context="student">
+                <RadzenTextBox @bind-Value="student.Email" Style="width:200px; display: block" Name="Email" aria-label="Uzupełnij email"/>
+                <RadzenRequiredValidator Text="Email jest wymagany" Component="Email" Popup="true"/>
             </EditTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="Birthdate" Title="Data Urodzenia" Width="200px">
@@ -37,7 +51,7 @@
                 @String.Format("{0:d}", student.Birthdate)
             </Template>
             <EditTemplate Context="student">
-                <RadzenDatePicker @bind-Value="student.Birthdate" Style="width:100%" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Wybierz datę urodzenia" }})" />
+                <RadzenDatePicker @bind-Value="student.Birthdate" Style="width:100%" InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Wybierz datę urodzenia" } })"/>
             </EditTemplate>
         </RadzenDataGridColumn>
 
@@ -84,8 +98,7 @@
     {
         await base.OnInitializedAsync();
 
-        students = await StudentService.GetAll();
-        
+        students = await StudentService.GetStudents();
     }
 
     async Task EditRow(Student student)
@@ -149,22 +162,25 @@
         await studentsGrid.InsertRow(student);
     }
 
-    void OnCreateRow(Student student)
+    async void OnCreateRow(Student student)
     {
-        StudentService.Insert(student);
+        student.IsEnrolled = true;
+        await StudentService.Insert(student);
         studentsToInsert.Remove(student);
         SendNotification(NotificationSeverity.Success, "Pomyślnie dodano", $"{student.FirstName} {student.LastName}");
+        await Refresh();
     }
 
     void SendNotification(NotificationSeverity severity, string message, string detail)
     {
         NotificationService.Notify(new NotificationMessage { Severity = severity, Summary = message, Detail = detail, CloseOnClick = true, Payload = DateTime.Now });
     }
-    
-    private async Task Refresh() 
-    { 
-        students = await StudentService.GetAll();
+
+    private async Task Refresh()
+    {
+        students = await StudentService.GetStudents();
         await studentsGrid.Reload();
         await InvokeAsync(StateHasChanged);
-    } 
+    }
+
 }

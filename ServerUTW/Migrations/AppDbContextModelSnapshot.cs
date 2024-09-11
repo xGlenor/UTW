@@ -17,6 +17,41 @@ namespace ServerUTW.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
 
+            modelBuilder.Entity("BaseLibrary.Models.AccountCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AccountCodes", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "TEST",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "test@test.com",
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
             modelBuilder.Entity("BaseLibrary.Models.Enrolllment", b =>
                 {
                     b.Property<int>("Id")
@@ -154,18 +189,24 @@ namespace ServerUTW.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateOnly>("Birthdate")
+                    b.Property<DateOnly?>("Birthdate")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsEnrolled")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -173,6 +214,10 @@ namespace ServerUTW.Migrations
 
                     b.Property<int?>("SessionId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Telephone")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -182,6 +227,34 @@ namespace ServerUTW.Migrations
                     b.HasIndex("SessionId");
 
                     b.ToTable("Students", (string)null);
+                });
+
+            modelBuilder.Entity("BaseLibrary.Models.TeacherEnrollment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LessonId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TeacherId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LessonId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("TeacherEnrollment", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -396,6 +469,9 @@ namespace ServerUTW.Migrations
                     b.Property<DateOnly>("Birthdate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("Code")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -459,6 +535,25 @@ namespace ServerUTW.Migrations
                     b.HasOne("BaseLibrary.Models.Session", null)
                         .WithMany("Students")
                         .HasForeignKey("SessionId");
+                });
+
+            modelBuilder.Entity("BaseLibrary.Models.TeacherEnrollment", b =>
+                {
+                    b.HasOne("BaseLibrary.Models.Lesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BaseLibrary.Models.ApplicationUser", "Teacher")
+                        .WithMany("TeacherEnrollments")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -536,6 +631,11 @@ namespace ServerUTW.Migrations
             modelBuilder.Entity("BaseLibrary.Models.Student", b =>
                 {
                     b.Navigation("Enrolllments");
+                });
+
+            modelBuilder.Entity("BaseLibrary.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("TeacherEnrollments");
                 });
 #pragma warning restore 612, 618
         }

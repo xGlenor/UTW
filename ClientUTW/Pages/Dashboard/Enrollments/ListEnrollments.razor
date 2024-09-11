@@ -1,22 +1,23 @@
 ﻿@page "/admin/Zapisy/Lista"
 @using BaseLibrary.Contracts
-@using BaseLibrary.GenericModels
 @using BaseLibrary.Models
+@using Microsoft.AspNetCore.Authorization
 @layout DashLayout
 @inject IEnrollmentRepository EnrollmentService
 @inject IStudentRepository StudentService
 @inject ILessonRepository LessonService
 @inject NotificationService NotificationService
+@attribute [Authorize(Roles = "Admin")]
 
 
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="mt-2 mb-4">
-    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Zapis" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && enrollmentsToInsert.Count() > 0)" />
+    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle_outline" Text="Dodaj Zapis" Click="@InsertRow" Disabled="@(editMode == DataGridEditMode.Single && enrollmentsToInsert.Count() > 0)"/>
 </RadzenStack>
 
-<RadzenDataGrid Responsive="true" @ref="enrollmentsGrid" AllowAlternatingRows="false" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
+<RadzenDataGrid Responsive="true" @ref="enrollmentsGrid" AllowAlternatingRows="false" FilterMode="FilterMode.Simple" AllowFiltering="true" AllowPaging="true" PageSize="10" AllowSorting="true" EditMode="@editMode"
                 Data="@enrollments" TItem="Enrolllment" RowUpdate="@OnUpdateRow" RowCreate="@OnCreateRow" Sort="@Reset" Page="@Reset" Filter="@Reset">
     <Columns>
-        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true" />
+        <RadzenDataGridColumn Property="Id" Title="ID" Width="120px" Frozen="true"/>
 
         <RadzenDataGridColumn Property="Student.FirstName" Title="Student" Width="220px">
             <Template Context="enrollment">
@@ -32,7 +33,7 @@
                 </RadzenDropDown>
             </EditTemplate>
         </RadzenDataGridColumn>
-        
+
         <RadzenDataGridColumn Property="Lesson.Name" Title="Zajęcia" Width="220px">
             <Template Context="enrollment">
                 @enrollment.Lesson.Name
@@ -47,6 +48,10 @@
                 </RadzenDropDown>
             </EditTemplate>
         </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Property="Lesson.Session.SessionType" Title="Semestr" Width="220px"/>
+
+        <RadzenDataGridColumn Property="Lesson.Session.SessionYear" Title="Rok Akademicki" Width="220px"/>
 
         <RadzenDataGridColumn Context="enrolllment" Filterable="false" Title="Akcja" Sortable="false" TextAlign="TextAlign.Center" Frozen="true" FrozenPosition="FrozenColumnPosition.Right" Width="10rem">
             <Template Context="enrolllment">
@@ -64,9 +69,10 @@
                 </RadzenButton>
             </EditTemplate>
         </RadzenDataGridColumn>
-        
+
     </Columns>
 </RadzenDataGrid>
+
 @code {
     RadzenDataGrid<Enrolllment> enrollmentsGrid;
     IEnumerable<Enrolllment> enrollments;
@@ -94,7 +100,7 @@
         await base.OnInitializedAsync();
 
         enrollments = await EnrollmentService.GetAll();
-        students = await StudentService.GetAll();
+        students = await StudentService.GetStudents();
         lessons = await LessonService.GetAll();
     }
 
@@ -112,7 +118,7 @@
     async void OnUpdateRow(Enrolllment enrollment)
     {
         Reset(enrollment);
-        
+
         EnrollmentService.Update(enrollment.Id, enrollment);
         await Refresh();
         SendNotification(NotificationSeverity.Info, "Pomyślnie zaktualizowano", $"UserId: {enrollment.StudentId} LessonId: {enrollment.LessonId}");
@@ -159,7 +165,6 @@
         enrollment.Lesson = new Lesson();
         enrollment.Student = new Student();
         enrollmentsToInsert.Add(enrollment);
-        
     }
 
     async void OnCreateRow(Enrolllment enrollment)
@@ -183,5 +188,5 @@
         await enrollmentsGrid.Reload();
         await InvokeAsync(StateHasChanged);
     }
-    
+
 }

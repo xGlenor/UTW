@@ -44,14 +44,14 @@ public class EnrollmentService : IEnrollmentRepository
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         var response = await _httpClient.GetAsync($"{BaseUrl}/{enrollmentID}");
-        
+
         if (!response.IsSuccessStatusCode)
             return null!;
-        
+
         var result = await response.Content.ReadAsStringAsync();
         return Generics.DeserializeJsonString<Enrolllment>(result);
     }
-    
+
     public async Task<Enrolllment> Insert(Enrolllment enrollment)
     {
         var enrollmentDTO = _mapper.Map<EnrollmentDTO>(enrollment);
@@ -66,11 +66,12 @@ public class EnrollmentService : IEnrollmentRepository
         var result = await response.Content.ReadAsStringAsync();
         return Generics.DeserializeJsonString<Enrolllment>(result);
     }
+
     public async Task<Enrolllment> Update(int id, Enrolllment enrollment)
     {
         var enrollmentDto = _mapper.Map<EnrollmentDTO>(enrollment);
         Console.WriteLine(Generics.SerializeObj(enrollmentDto));
-        
+
         string? token = await _localStorageService.GetItemAsStringAsync("token");
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -84,7 +85,7 @@ public class EnrollmentService : IEnrollmentRepository
 
         if (result.flag)
             return Generics.DeserializeJsonString<Enrolllment>(result.objectJson);
-        
+
         return null!;
     }
 
@@ -100,5 +101,115 @@ public class EnrollmentService : IEnrollmentRepository
 
         var result = await response.Content.ReadAsStringAsync();
         return Generics.DeserializeJsonString<Enrolllment>(result);
+    }
+
+    public async Task<List<TeacherEnrollment>> GetAllTeachers()
+    {
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.GetAsync($"{BaseUrl}/Teachers");
+
+
+        if (!response.IsSuccessStatusCode)
+            return null!;
+
+        var result = await response.Content.ReadAsStringAsync();
+        return [.. Generics.DeserializeJsonStringList<TeacherEnrollment>(result)];
+    }
+
+    public async Task<TeacherEnrollment?> GetTeacherById(int enrollmentID)
+    {
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.GetAsync($"{BaseUrl}/Teachers/{enrollmentID}");
+
+        if (!response.IsSuccessStatusCode)
+            return null!;
+
+        var result = await response.Content.ReadAsStringAsync();
+        return Generics.DeserializeJsonString<TeacherEnrollment>(result);
+    }
+
+    public async Task<TeacherEnrollment> InsertTeacher(TeacherEnrollment enrollment)
+    {
+        var enrollmentDTO = _mapper.Map<TeacherEnrollmentDto>(enrollment);
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient
+            .PostAsync($"{BaseUrl}/Teachers",
+                Generics.GenerateStringContent(
+                    Generics.SerializeObj(enrollmentDTO)));
+
+        var result = await response.Content.ReadAsStringAsync();
+        return Generics.DeserializeJsonString<TeacherEnrollment>(result);
+    }
+
+    public async Task<TeacherEnrollment> UpdateTeacher(int id, TeacherEnrollment enrollment)
+    {
+        var enrollmentDto = _mapper.Map<TeacherEnrollmentDto>(enrollment);
+        Console.WriteLine(Generics.SerializeObj(enrollmentDto));
+
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        var response = await _httpClient.PutAsync($"{BaseUrl}/Teachers/{id}",
+            Generics.GenerateStringContent(
+                Generics.SerializeObj(enrollmentDto)));
+
+        var readAsString = await response.Content.ReadAsStringAsync();
+        var result = Generics.DeserializeJsonString<EntityResponse>(readAsString);
+
+        if (result.flag)
+            return Generics.DeserializeJsonString<TeacherEnrollment>(result.objectJson);
+
+        return null!;
+    }
+
+    public async Task<TeacherEnrollment> DeleteTeacher(int enrollmentID)
+    {
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/Teachers/{enrollmentID}");
+
+        if (!response.IsSuccessStatusCode)
+            return null!;
+
+        var result = await response.Content.ReadAsStringAsync();
+        return Generics.DeserializeJsonString<TeacherEnrollment>(result);
+    }
+
+    public async Task<List<TeacherEnrollment>> GetTeacherEnrollmentsById(string userId)
+    {
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.GetAsync($"{BaseUrl}/TeacherEnrollemntsbyId/{userId}");
+
+
+        if (!response.IsSuccessStatusCode)
+            return null!;
+
+        var result = await response.Content.ReadAsStringAsync();
+        return [.. Generics.DeserializeJsonStringList<TeacherEnrollment>(result)];
+    }
+
+    public async Task<List<Enrolllment>> GetStudentbyLessonId(int LessonId)
+    {
+        string? token = await _localStorageService.GetItemAsStringAsync("token");
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var response = await _httpClient.GetAsync($"{BaseUrl}/ByLesson/{LessonId}");
+
+
+        if (!response.IsSuccessStatusCode)
+            return null!;
+
+        var result = await response.Content.ReadAsStringAsync();
+        return [.. Generics.DeserializeJsonStringList<Enrolllment>(result)];
     }
 }

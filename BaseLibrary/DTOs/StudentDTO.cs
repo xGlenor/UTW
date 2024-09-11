@@ -9,10 +9,16 @@ public class StudentDTO
     
     [Required]
     public string LastName { get; set; }
-
-    [Required]
+    
     public string Address { get; set; }
     
     [Required]
-    public DateOnly Birthdate { get; set; }
+    public string Telephone { get; set; }
+    
+    [Required]
+    public string Email { get; set; }
+    
+    public DateOnly? Birthdate { get; set; }
+    
+    public bool IsEnrolled { get; set; }
 }

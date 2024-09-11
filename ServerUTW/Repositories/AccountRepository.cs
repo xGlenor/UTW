@@ -7,6 +7,7 @@ using BaseLibrary.Models;
 using BaseLibrary.Responses;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+
 namespace ServerUTW.Repositories;
 
 public class AccountRepository(
@@ -28,7 +29,7 @@ public class AccountRepository(
             Email = userDto.Email,
             UserName = userDto.Email
         };
-        
+
         var user = await userManager.FindByEmailAsync(newUser.Email);
 
         if (user != null)
@@ -52,7 +53,6 @@ public class AccountRepository(
 
         await userManager.AddToRoleAsync(newUser, "Teacher");
         return new GeneralResponse(true, "Konto utworzone");
-
     }
 
     public async Task<LoginResponse> LoginAccount(LoginDTO? loginDto)
@@ -72,11 +72,6 @@ public class AccountRepository(
         var userSession = new UserSession(getUser.Id, getUser.UserName, getUser.Email, getUserRole.First());
         string token = GenerateToken(userSession);
         return new LoginResponse(true, token!, "Logowanie pomyślne");
-    }
-
-    public Task<Student[]> GetStudents()
-    {
-        throw new NotImplementedException();
     }
 
     private string GenerateToken(UserSession? user)

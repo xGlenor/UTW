@@ -11,3 +11,13 @@ public class EnrollmentDTO
     public int LessonId { get; set; }
     
 }
+
+public class TeacherEnrollmentDto
+{
+    [Required]
+    public string TeacherId { get; set; }
+    
+    [Required]
+    public int LessonId { get; set; }
+    
+}

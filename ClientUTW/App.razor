@@ -1,17 +1,29 @@
-﻿
+﻿@using ClientUTW.Auth
+@inject NavigationManager NavigationManager
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <Authorizing><h2>Please wait...</h2></Authorizing>
+                <Authorizing>
+                    <h2>Please wait...</h2>
+                </Authorizing>
+                <NotAuthorized>
+                    @if (!context.User.Identity.IsAuthenticated)
+                    {
+                        <RedirectToLogin/>
+                    }
+                    else
+                    {
+                        <h1>Unauthorized</h1>
+                        <p>You are not authorized to access this page.</p>
+                    }
+                </NotAuthorized>
             </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
         </Found>
         <NotFound>
-            <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
-            </LayoutView>
+            <RedirectToLogin Url=""/>
         </NotFound>
     </Router>
+
 </CascadingAuthenticationState>

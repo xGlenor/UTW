@@ -1,11 +1,13 @@
 ﻿@page "/Register"
 @using BaseLibrary.Contracts
 @using BaseLibrary.DTOs
+@using BaseLibrary.GenericModels
+@using BaseLibrary.Models
 @using ClientUTW.Auth
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavManager
 
-
+@inject IAccountCodeRepository AccountCodeService
 @inject IAccountRepository AccountService
 @inject IJSRuntime js
 
@@ -29,49 +31,59 @@
                         <div class="card-body">
                             <div class="m-sm-3">
                                 <EditForm Model="User" OnValidSubmit="HandleRegistration" Enhance>
-                                    <DataAnnotationsValidator />
-                                    <ValidationSummary />
+                                    <DataAnnotationsValidator/>
+                                    <ValidationSummary/>
                                     <div class="mb-3">
-                                        <label class="form-label">FirstName</label>
-                                        <input  @bind="User.FirstName" class="form-control form-control-lg" type="text" name="firstname" placeholder="Enter your FirstName" />
+                                        <label class="form-label">Imię</label>
+                                        <input @bind="User.FirstName" class="form-control form-control-lg" type="text" name="firstname" placeholder="Tutaj wpisz imię"/>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">LastName</label>
-                                        <input  @bind="User.LastName" class="form-control form-control-lg" type="text" name="lastname" placeholder="Enter your LastName" />
+                                        <input @bind="User.LastName" class="form-control form-control-lg" type="text" name="lastname" placeholder="Tutaj wpisz nazwisko"/>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
-                                        <input  @bind="User.Email" class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
+                                        <input @bind="User.Email" class="form-control form-control-lg" type="email" name="email" placeholder="Tutaj wpisz email"/>
+                                        <p class="text-muted">*Podany email przy rejestracji w systemie</p>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label">Password</label>
+                                        <label class="form-label">Hasło</label>
                                         <div class="input-group mb-3">
                                             <input type="@(ShowPassword is true ? "text" : "password")"
                                                    class="form-control"
                                                    @bind="User.Password"
-                                                   placeholder="Password"
+                                                   placeholder="Hasło"
                                                    aria-label="Password"
                                                    aria-describedby="Password">
 
                                             <span class="input-group-text cursorStyle"
                                                   id="Password"
-                                                  @onclick="ShowPasswordEvent"> @(ShowPassword is true ? "Hide" : "Show") </span>
+                                                  @onclick="ShowPasswordEvent">
+                                                @(ShowPassword is true ? "Hide" : "Show")
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label">Confirm Password</label>
+                                        <label class="form-label">Powtórz Hasło</label>
                                         <div class="input-group mb-3">
                                             <input type="@(ShowConfirmPassword is true ? "text" : "password")"
                                                    class="form-control"
                                                    @bind="User.ConfirmPassword"
-                                                   placeholder="Confirm Password"
+                                                   placeholder="Powtórz Hasło"
                                                    aria-label="ConfirmPassword"
                                                    aria-describedby="Confirm-Password">
 
                                             <span class="input-group-text cursorStyle"
                                                   id="ConfirmPassword"
-                                                  @onclick="ShowConfirmPasswordEvent"> @(ShowConfirmPassword is true ? "Hide" : "Show") </span>
+                                                  @onclick="ShowConfirmPasswordEvent">
+                                                @(ShowConfirmPassword is true ? "Hide" : "Show")
+                                            </span>
                                         </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Kod dostępu</label>
+                                        <input @bind="AccountCode.Code" class="form-control form-control-lg" type="text" name="Code" placeholder="Podaj swój kod"/>
+                                        <p class="text-muted">*Podany kod przy rejestracji w systemie</p>
                                     </div>
                                     <div class="d-grid gap-2 mt-3">
                                         <button class="btn btn-lg btn-primary" type="submit">Zaloguj się</button>
@@ -91,8 +103,22 @@
     public bool ShowConfirmPassword { get; set; }
 
     public UserDTO User { get; set; } = new();
+    public VerifyCodeDTO AccountCode { get; set; } = new();
+
+
     private async Task HandleRegistration()
     {
+        AccountCode.Email = User.Email;
+        if (string.IsNullOrEmpty(AccountCode.Code) && string.IsNullOrEmpty(AccountCode.Email))
+            return;
+
+        var verifiedCode = await AccountCodeService.VerifyCode(AccountCode)!;
+
+        if (verifiedCode == null)
+        {
+            NavManager.NavigateTo("/Register", forceLoad: true);
+        }
+
         var (flag, message) = await AccountService.CreateAccount(User);
         if (flag)
         {
@@ -104,9 +130,9 @@
 
         await js.InvokeVoidAsync("alert", message);
         return;
-
     }
 
     void ShowPasswordEvent() => ShowPassword = !ShowPassword;
     void ShowConfirmPasswordEvent() => ShowConfirmPassword = !ShowConfirmPassword;
+
 }

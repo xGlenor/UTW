@@ -26,6 +26,7 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="Pages\Dashboard\Session\ListSessions.razor" />
+      <_ContentIncludedByDefault Remove="Components\GetList.razor" />
     </ItemGroup>
 
     <ItemGroup>

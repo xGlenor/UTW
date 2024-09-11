@@ -1,4 +1,5 @@
 ﻿using BaseLibrary.Contracts;
+using BaseLibrary.enums;
 using BaseLibrary.GenericModels;
 using BaseLibrary.Models;
 using Blazored.LocalStorage;
@@ -13,7 +14,8 @@ public class SessionService : ISessionRepository
     private readonly ILocalStorageService _localStorageService;
     private readonly NotificationService _notificationService;
 
-    public SessionService(HttpClient httpClient, ILocalStorageService localStorageService, NotificationService notificationService)
+    public SessionService(HttpClient httpClient, ILocalStorageService localStorageService,
+        NotificationService notificationService)
     {
         this._httpClient = httpClient;
         this._localStorageService = localStorageService;
@@ -71,5 +73,16 @@ public class SessionService : ISessionRepository
 
         var result = await response.Content.ReadAsStringAsync();
         return Generics.DeserializeJsonString<Session>(result);
+    }
+
+    public async Task<Session> GetCurrentSemester(DateTime currentDate)
+    {
+        int year = currentDate.Year;
+        bool isWinter = currentDate.Month >= 10 || currentDate.Month <= 2;
+        var sessions = await GetAll();
+
+        return isWinter
+            ? sessions.First(s => s.SessionType.Equals(SessionType.WINTER) && s.SessionYear.Equals(year))
+            : sessions.First(s => s.SessionType.Equals(SessionType.SUMMER) && s.SessionYear.Equals(year));
     }
 }

@@ -29,15 +29,15 @@
                         <div class="card-body">
                             <div class="m-sm-3">
                                 <EditForm Enhance Model="User" OnValidSubmit="HandleLogin">
-                                    <DataAnnotationsValidator />
-                                    <ValidationSummary />
+                                    <DataAnnotationsValidator/>
+                                    <ValidationSummary/>
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
-                                        <input  @bind="User.Email" class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
+                                        <input @bind="User.Email" class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email"/>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Password</label>
-                                        <input @bind="User.Password" class="form-control form-control-lg" type="password" name="password" placeholder="Enter password" />
+                                        <input @bind="User.Password" class="form-control form-control-lg" type="password" name="password" placeholder="Enter password"/>
                                     </div>
                                     <div class="d-grid gap-2 mt-3">
                                         <button class="btn btn-lg btn-primary" type="submit">Zaloguj się</button>
@@ -72,4 +72,5 @@
         await js.InvokeVoidAsync("alert", message);
         return;
     }
+
 }

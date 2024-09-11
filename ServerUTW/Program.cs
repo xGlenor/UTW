@@ -21,11 +21,9 @@ var builder = WebApplication.CreateBuilder(args);
 |--------------------------------------------------------------------------
 */
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+builder.Services.AddControllers(
+        opt => opt.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true)
+    .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
@@ -37,12 +35,9 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 | Database Settings
 |--------------------------------------------------------------------------
 */
-var connectionString = builder.Configuration.GetConnectionString("DBString");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlite("Data Source=utw.db");
-});
+builder.Services.AddDbContext<AppDbContext>(options => { options.UseSqlite("Data Source=utw.db"); });
+
 /*
 |--------------------------------------------------------------------------
 | Identity Settings & JWT Settings
@@ -101,6 +96,8 @@ builder.Services.AddScoped<IFeeRepository, FeeRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<IAccountCodeRepository, AccountCodeRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 /*
 |--------------------------------------------------------------------------
@@ -108,22 +105,25 @@ builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 |--------------------------------------------------------------------------
 */
 
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+using (var scopeDB = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseCors(policy =>
-    {
-        policy.WithOrigins("http://localhost:7132", "https://localhost:7132")
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithHeaders(HeaderNames.ContentType);
-    });
+    var dbContext = scopeDB.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
 }
 
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseCors(policy =>
+{
+    policy.AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+});
+
+/*app.UseHttpsRedirection();*/
 
 app.UseAuthentication();
 app.UseAuthorization();

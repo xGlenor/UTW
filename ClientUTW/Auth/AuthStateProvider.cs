@@ -27,6 +27,18 @@ public class AuthStateProvider(ILocalStorageService localStorageService) : Authe
             return await Task.FromResult(new AuthenticationState(_anonymous));
         }
     }
+    
+    public async Task<string?> GetId()
+    {
+        string stringToken = await localStorageService.GetItemAsStringAsync("token");
+
+        if (string.IsNullOrWhiteSpace(stringToken))
+            return string.Empty;
+
+        var claims = Generics.GetClaimsFromToken(stringToken);
+            
+        return claims.Id;
+    }
 
     public async Task UpdateAuthenticationState(string? token)
     {

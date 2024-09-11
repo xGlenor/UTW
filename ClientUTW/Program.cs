@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Text;
 using BaseLibrary.Contracts;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
@@ -12,7 +14,15 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7217/") });
+HttpClient client = new HttpClient();
+
+client.BaseAddress = new Uri("https://apiutw.gduraj.pl");
+client.DefaultRequestHeaders
+    .Accept
+    .Add(new MediaTypeWithQualityHeaderValue("application/json")); //ACCEPT header
+
+
+builder.Services.AddScoped(sp => client);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddRadzenComponents();
@@ -23,7 +33,9 @@ builder.Services.AddScoped<IEnrollmentRepository, EnrollmentService>();
 builder.Services.AddScoped<IFeeRepository, FeeService>();
 builder.Services.AddScoped<ILessonRepository, LessonService>();
 builder.Services.AddScoped<ISessionRepository, SessionService>();
+builder.Services.AddScoped<IAccountCodeRepository, AccountCodeService>();
+builder.Services.AddScoped<IUserRepository, UserService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-    
+
 
 await builder.Build().RunAsync();

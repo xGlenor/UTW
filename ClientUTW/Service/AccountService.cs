@@ -21,9 +21,9 @@ namespace ClientUTW.Service
         public async Task<GeneralResponse> CreateAccount(UserDTO userDTO)
         {
             var response = await httpClient
-                 .PostAsync($"{BaseUrl}/registerUser",
-                 Generics.GenerateStringContent(
-                 Generics.SerializeObj(userDTO)));
+                .PostAsync($"{BaseUrl}/registerUser",
+                    Generics.GenerateStringContent(
+                        Generics.SerializeObj(userDTO)));
 
             //Read Response
             if (!response.IsSuccessStatusCode)
@@ -38,9 +38,9 @@ namespace ClientUTW.Service
         public async Task<LoginResponse> LoginAccount(LoginDTO loginDTO)
         {
             var response = await httpClient
-               .PostAsync($"{BaseUrl}/loginUser",
-               Generics.GenerateStringContent(
-               Generics.SerializeObj(loginDTO)));
+                .PostAsync($"{BaseUrl}/loginUser",
+                    Generics.GenerateStringContent(
+                        Generics.SerializeObj(loginDTO)));
 
             //Read Response
             if (!response.IsSuccessStatusCode)
@@ -51,19 +51,5 @@ namespace ClientUTW.Service
 
         }
         
-        public async Task<Student[]> GetStudents()
-        {
-            string? token = await localStorageService.GetItemAsStringAsync("token");
-            httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var response = await httpClient.GetAsync("api/Student/admin");
-
-        
-            if (!response.IsSuccessStatusCode)
-                return null!;
-
-            var result = await response.Content.ReadAsStringAsync();
-            return [.. Generics.DeserializeJsonStringList<Student>(result)];
-        }
     }
 }

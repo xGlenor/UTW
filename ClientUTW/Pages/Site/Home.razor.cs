@@ -8,25 +8,17 @@ public partial class Home : ComponentBase
 {
     private int selectedIndex = 0;
 
-    private IEnumerable<Session> sessions = new List<Session>();
     private IEnumerable<Lesson> lessonsBySession = new List<Lesson>();
 
-    [Inject] 
-    ILessonRepository LessonService { get; set; }
-    [Inject]
-    ISessionRepository SessionService { get; set; }
-    
-    protected async override Task OnInitializedAsync()
+    [Inject] ILessonRepository LessonService { get; set; }
+    [Inject] ISessionRepository SessionService { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        sessions = await SessionService.GetAll();
-        
+        selectedIndex = SessionService.GetCurrentSemester(DateTime.Now).Id;
+
+        lessonsBySession = await LessonService.GetBySessionId(selectedIndex);
     }
-    
-    async void OnChange(int index)
-    {
-        lessonsBySession = await LessonService.GetBySessionId(index);
-    }
-    
 }

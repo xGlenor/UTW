@@ -1,4 +1,7 @@
-﻿<nav id="sidebar" class="sidebar js-sidebar">
+﻿@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+
+<nav id="sidebar" class="sidebar js-sidebar">
     <div class="sidebar-content js-simplebar">
         <NavLink class="sidebar-brand text-center" href="admin">
             <span class="align-middle">UTW</span>
@@ -7,13 +10,22 @@
         <ul class="sidebar-nav">
 
             <li class="sidebar-item">
-                <NavLink class="sidebar-link" href="admin"><i class="fa-solid fa-chalkboard"></i> <span class="align-middle">Dashboard</span></NavLink>
+                <NavLink class="sidebar-link" href="admin">
+                    <i class="fa-solid fa-chalkboard"></i> <span class="align-middle">Dashboard</span>
+                </NavLink>
             </li>
-            
+
+            @if (_authState?.User?.Identity != null && _authState.User.IsInRole("Admin"))
+            {
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="admin/Studenci/Zapisani">
+                    <i class="fa-solid fa-users"></i> <span class="align-middle">Lista studentów</span>
+                </NavLink>
+            </li>
 
             <li class="sidebar-item">
-                <NavLink class="sidebar-link" href="admin/Studenci/Lista">
-                    <i class="fa-solid fa-users"></i> <span class="align-middle">Lista studentów</span>
+                <NavLink class="sidebar-link" href="admin/Studenci/Kandydaci">
+                    <i class="fa-solid fa-users"></i> <span class="align-middle">Lista kandydatów</span>
                 </NavLink>
             </li>
 
@@ -22,7 +34,7 @@
                     <i class="fa-solid fa-wallet"></i> <span class="align-middle">Opłaty</span>
                 </NavLink>
             </li>
-            
+
 
             <li class="sidebar-item">
                 <NavLink class="sidebar-link" href="admin/Semestry/Lista">
@@ -37,12 +49,46 @@
             </li>
             <li class="sidebar-item">
                 <NavLink class="sidebar-link" href="admin/Zapisy/Lista">
-                    <i class="fa-solid fa-bookmark"></i> <span class="align-middle">Zapisy</span>
+                    <i class="fa-solid fa-bookmark"></i> <span class="align-middle">Zapisy Studentów</span>
                 </NavLink>
             </li>
-            
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="admin/Zapisy/Nauczyciele">
+                    <i class="fa-solid fa-bookmark"></i> <span class="align-middle">Zapisy Nauczycieli</span>
+                </NavLink>
+            </li>
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="admin/Uzytkownicy/Lista">
+                    <i class="fa-solid fa-user"></i> <span class="align-middle">Uzytkownicy</span>
+                </NavLink>
+            </li>
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="admin/Zajecia/MojeZajecia">
+                    <i class="fa-solid fa-bookmark"></i> <span class="align-middle">Moje zajecia</span>
+                </NavLink>
+            </li>
+            }
+            else
+            {
+            <li class="sidebar-item">
+                <NavLink class="sidebar-link" href="admin/Zajecia/MojeZajecia">
+                    <i class="fa-solid fa-bookmark"></i> <span class="align-middle">Moje zajecia</span>
+                </NavLink>
+            </li>
+            }
         </ul>
 
 
     </div>
 </nav>
+
+@code {
+    AuthenticationState? _authState;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _authState = await AuthStateProvider.GetAuthenticationStateAsync();
+    }
+
+}

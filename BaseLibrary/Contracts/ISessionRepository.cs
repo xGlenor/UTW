@@ -14,5 +14,6 @@ namespace BaseLibrary.Contracts
         Task<Session> Insert(Session session);
         Task<Session> Update(int id, Session session);
         Task<Session> Delete(int sessionID);
+        Task<Session> GetCurrentSemester(DateTime currentDate);
     }
 }
